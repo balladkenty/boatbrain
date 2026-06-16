@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BOAT BRAIN</title>
+<style>
+body{font-family:'Noto Sans JP',sans-serif;background:#05080f;color:#dde8ff;margin:0;padding:0}
+nav{background:#0c1420;border-bottom:1px solid #1e3654;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100}
+.logo{font-size:14px;font-weight:900;color:#55aaff;letter-spacing:.1em}
+.app{max-width:800px;margin:0 auto;padding:16px}
+.card{background:rgba(255,255,255,.04);border:1px solid #1e3654;border-radius:8px;padding:16px;margin-bottom:12px}
+select,input{background:#0c1420;border:1px solid #1e3654;color:#dde8ff;padding:8px;border-radius:4px;font-size:14px;width:100%}
+.row{display:grid;grid-template-columns:1fr 80px 80px 80px;gap:8px;margin-bottom:12px}
+.btn{background:#1e3654;border:none;color:#55aaff;padding:12px;border-radius:4px;font-size:14px;font-weight:700;cursor:pointer;width:100%;margin-bottom:12px}
+.btn:hover{background:#2a4a6a}
+.btn-pred{background:linear-gradient(135deg,#0a3580,#2878f0);color:#fff;display:none}
+.btn-pred.show{display:block}
+.tag{display:inline-block;font-size:10px;padding:2px 8px;border-radius:2px;margin-right:6px}
+.tag-on{background:rgba(0,204,102,.15);color:#00cc66;border:1px solid rgba(0,204,102,.3)}
+.tag-off{background:rgba(255,255,255,.06);color:#556a88}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{color:#556a88;font-size:11px;padding:6px 4px;text-align:center;border-bottom:1px solid #1e3654}
+td{padding:8px 4px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)}
+td:nth-child(2){text-align:left}
+.b1{background:#fff;color:#111;width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:900;font-size:12px}
+.b2{background:#111;color:#fff;border:1px solid #444}
+.b3{background:#e63946;color:#fff}
+.b4{background:#2878f0;color:#fff}
+.b5{background:#ffd000;color:#111}
+.b6{background:#2ecc71;color:#111}
+.verdict{border-radius:8px;padding:14px 16px;margin-bottom:12px;display:none}
+.verdict.show{display:block}
+.verdict.go{background:rgba(0,204,102,.06);border:1px solid rgba(0,204,102,.2)}
+.verdict.warn{background:rgba(255,153,0,.06);border:1px solid rgba(255,153,0,.2)}
+.prob-bar{height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden;margin-top:4px}
+.prob-fill{height:100%;border-radius:2px}
+#loading{display:none;text-align:center;padding:24px;color:#556a88}
+.spin{display:inline-block;width:28px;height:28px;border:2px solid #1e3654;border-top-color:#55aaff;border-radius:50%;animation:spin .7s linear infinite;margin-bottom:8px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ev-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:13px}
+.ev-plus{color:#00cc66;font-weight:700}
+.ev-warn{color:#ffaa00}
+.amt{background:#00cc66;color:#05080f;font-size:11px;font-weight:900;padding:3px 8px;border-radius:2px}
+</style>
+</head>
+<body>
+<nav>
+  <div class="logo">BOATBRAIN</div>
+  <div id="clock" style="font-size:12px;color:#556a88"></div>
+</nav>
+<div class="app">
+
+  <div class="card">
+    <div class="row">
+      <div>
+        <div style="font-size:10px;color:#556a88;margin-bottom:4px">会場</div>
+        <select id="sv">
+          <option value="24">大村</option><option value="1">桐生</option>
+          <option value="2">戸田</option><option value="3">江戸川</option>
+          <option value="4">平和島</option><option value="5">多摩川</option>
+          <option value="6">浜名湖</option><option value="7">蒲郡</option>
+          <option value="8">常滑</option><option value="9">津</option>
+          <option value="10">三国</option><option value="11">びわこ</option>
+          <option value="12">住之江</option><option value="13">尼崎</option>
+          <option value="14">鳴門</option><option value="15">丸亀</option>
+          <option value="16">児島</option><option value="17">宮島</option>
+          <option value="18">徳山</option><option value="19">下関</option>
+          <option value="20">若松</option><option value="21">芦屋</option>
+          <option value="22">福岡</option><option value="23">唐津</option>
+        </select>
+      </div>
+      <div>
+        <div style="font-size:10px;color:#556a88;margin-bottom:4px">R</div>
+        <select id="sr">
+          <option>1</option><option>2</option><option>3</option><option>4</option>
+          <option>5</option><option>6</option><option>7</option><option>8</option>
+          <option>9</option><option>10</option><option>11</option><option>12</option>
+        </select>
+      </div>
+      <div>
+        <div style="font-size:10px;color:#556a88;margin-bottom:4px">風速m</div>
+        <input type="number" id="iw" value="2" min="0" max="20">
+      </div>
+      <div>
+        <div style="font-size:10px;color:#556a88;margin-bottom:4px">波高cm</div>
+        <input type="number" id="iv" value="2" min="0" max="50">
+      </div>
+    </div>
+    <button class="btn" onclick="fetchData()">出走表・展示・オッズを取得</button>
+  </div>
+
+  <div id="loading"><div class="spin"></div><br><span id="lmsg">取得中...</span></div>
+
+  <!-- 判定 -->
+  <div class="verdict" id="vdict"></div>
+
+  <!-- 出走表 -->
+  <div class="card" id="race-card" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div style="font-weight:700" id="race-title"></div>
+      <div id="race-chips"></div>
+    </div>
+    <table>
+      <tr>
+        <th></th><th style="text-align:left">選手</th>
+        <th>勝率</th><th>展示ST</th><th>展示T</th><th>当地%</th><th>単勝</th>
+      </tr>
+      <tbody id="boat-tbody"></tbody>
+    </table>
+  </div>
+
+  <button class="btn btn-pred" id="bp" onclick="runPredict()">AI予測を実行</button>
+
+  <!-- 結果 -->
+  <div id="result-area" style="display:none">
+
+    <div class="card">
+      <div style="font-size:10px;color:#556a88;margin-bottom:10px">AI予測確率</div>
+      <div id="prob-area"></div>
+    </div>
+
+    <div class="card">
+      <div style="font-size:10px;color:#556a88;margin-bottom:10px">回収率・期待値</div>
+      <div id="roi-area"></div>
+    </div>
+
+    <div class="card" id="ev-card" style="display:none">
+      <div style="font-size:10px;color:#556a88;margin-bottom:10px">EV推奨買い目</div>
+      <div id="ev-area"></div>
+    </div>
+
+    <div class="card" id="upset-card" style="display:none">
+      <div style="font-size:10px;color:#ffa500;margin-bottom:10px">▶ 荒れ因子</div>
+      <div id="upset-area"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const API='https://boatbrain.onrender.com';
+const BG=['#fff','#111','#e63946','#2878f0','#ffd000','#2ecc71'];
+const BT=['#111','#fff','#fff','#fff','#111','#111'];
+const MK=['◎','○','△','','',''];
+const VENUE_ADV={"大村":.671,"住之江":.598,"尼崎":.590,"徳山":.582,"下関":.578,"常滑":.573,"蒲郡":.571,"唐津":.570,"芦屋":.565,"若松":.562,"福岡":.559,"宮島":.554,"多摩川":.549,"桐生":.545,"鳴門":.540,"丸亀":.538,"平和島":.535,"浜名湖":.530,"三国":.528,"児島":.525,"津":.520,"びわこ":.515,"戸田":.480,"江戸川":.455};
+const VENUE_ACC={"大村":.716,"尼崎":.818,"住之江":.749,"常滑":.750,"福岡":.774,"徳山":.736,"若松":.725,"桐生":.726,"多摩川":.722,"浜名湖":.718,"児島":.714,"平和島":.697,"びわこ":.683,"鳴門":.692,"唐津":.682,"芦屋":.679,"丸亀":.655,"蒲郡":.650,"津":.649,"宮島":.644,"三国":.583,"戸田":.577,"江戸川":.551};
+const CV={"24":"大村","1":"桐生","2":"戸田","3":"江戸川","4":"平和島","5":"多摩川","6":"浜名湖","7":"蒲郡","8":"常滑","9":"津","10":"三国","11":"びわこ","12":"住之江","13":"尼崎","14":"鳴門","15":"丸亀","16":"児島","17":"宮島","18":"徳山","19":"下関","20":"若松","21":"芦屋","22":"福岡","23":"唐津"};
+const TTAX=.75; const RTAX=.725; const KL=.25; const MEV=1.05;
+
+let boats=[], before={}, odds={}, jcd=24, rno=1, vname='大村';
+
+setInterval(()=>{
+  const t=new Date();
+  document.getElementById('clock').textContent=
+    String(t.getHours()).padStart(2,'0')+':'+String(t.getMinutes()).padStart(2,'0');
+},1000);
+
+async function sf(url){
+  try{
+    const r=await fetch(url,{signal:AbortSignal.timeout(15000)});
+    return await r.json();
+  }catch(e){
+    console.error(url,e);
+    return null;
+  }
+}
+
+function show(id,v=true){document.getElementById(id).style.display=v?'block':'none'}
+function loading(msg){show('loading');document.getElementById('lmsg').textContent=msg}
+function done(){show('loading',false)}
+
+async function fetchData(){
+  jcd=parseInt(document.getElementById('sv').value);
+  rno=parseInt(document.getElementById('sr').value);
+  vname=CV[jcd]||'大村';
+  boats=[];before={};odds={};
+  show('race-card',false);show('result-area',false);
+  document.getElementById('bp').classList.remove('show');
+  document.getElementById('vdict').classList.remove('show');
+
+  loading('出走表を取得中...');
+  const today=new Date().toISOString().slice(0,10).replace(/-/g,'');
+
+  // 出走表
+  const rl=await sf(`${API}/api/racelist?jcd=${jcd}&rno=${rno}&date=${today}`);
+  if(rl&&rl.boats) boats=rl.boats;
+  else{done();alert('出走表が取得できませんでした');return;}
+
+  // 展示
+  document.getElementById('lmsg').textContent='展示情報を取得中...';
+  const br=await sf(`${API}/api/before?jcd=${jcd}&rno=${rno}&date=${today}`);
+  if(br&&br.before) before=br.before;
+
+  // オッズ
+  document.getElementById('lmsg').textContent='オッズを取得中...';
+  const od=await sf(`${API}/api/odds?jcd=${jcd}&rno=${rno}&date=${today}`);
+  if(od) odds=od.odds||od;
+
+  done();
+  renderBoats();
+  renderVerdict();
+  show('race-card');
+  document.getElementById('bp').classList.add('show');
+}
+
+function getBI(boat){return before[boat]||before[String(boat)]||{};}
+function getTansho(){return odds.tansho||{};}
+
+function renderBoats(){
+  const tansho=getTansho();
+  const hasBefore=Object.values(before).some(b=>b&&b.exh_time);
+  const hasOdds=Object.values(tansho).some(v=>v>0);
+  const stArr=boats.map(b=>getBI(b.boat).exh_st??99);
+  const exhArr=boats.map(b=>getBI(b.boat).exh_time??99);
+  const minST=Math.min(...stArr.filter(v=>v<99));
+  const minExh=Math.min(...exhArr.filter(v=>v<99));
+
+  document.getElementById('race-title').textContent=`${vname} ${rno}R`;
+  document.getElementById('race-chips').innerHTML=
+    (hasOdds?'<span class="tag tag-on">LIVE</span>':'')+ 
+    (hasBefore?'<span class="tag tag-on">展示済み</span>':'<span class="tag tag-off">展示前</span>');
+
+  document.getElementById('boat-tbody').innerHTML=boats.map((b,i)=>{
+    const bi=getBI(b.boat);
+    const st=bi.exh_st; const exht=bi.exh_time;
+    const o=tansho[b.boat]||tansho[String(b.boat)];
+    const va=Math.round((b.venue_win_rate||.17)*100);
+    const isF=b.f_count>0;
+    const bestST=st!=null&&Math.abs(st-minST)<.005;
+    const bestExh=exht!=null&&Math.abs(exht-minExh)<.005;
+    return`<tr>
+      <td><div class="b${b.boat}" style="background:${BG[i]};color:${BT[i]};width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:900;font-size:12px">${b.boat}</div></td>
+      <td><div style="font-weight:700;font-size:13px">${b.name||'—'}${isF?`<span style="font-size:9px;background:#ff3355;color:#fff;padding:1px 4px;border-radius:2px;margin-left:3px">F${b.f_count}</span>`:''}</div>
+          <div style="font-size:10px;color:#556a88">${b.grade}</div></td>
+      <td>${(b.national_win||0).toFixed(2)}</td>
+      <td style="color:${bestST?'#00d4b8':st!=null?'#55aaff':'#556a88'}">${st!=null?'.'+String(Math.round(st*100)).padStart(2,'0'):'—'}</td>
+      <td style="color:${bestExh?'#00d4b8':exht!=null?'#55aaff':'#556a88'}">${exht!=null?exht.toFixed(2):'—'}</td>
+      <td style="color:${va>25?'#00d4b8':'#dde8ff'}">${va}%</td>
+      <td style="color:${o&&o>0?o>8?'#ffd000':'#dde8ff':'#556a88'}">${o&&o>0?o.toFixed(1)+'倍':'—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderVerdict(){
+  const stArr=boats.map(b=>getBI(b.boat).exh_st??b.avg_st??0.17);
+  const minST=Math.min(...stArr);
+  const b1st=stArr[0]??0.17;
+  const b1wr=boats[0]?.national_win??5;
+  const rivalMaxWr=Math.max(...boats.slice(1).map(b=>b.national_win??5));
+  const c1StDis=Math.max(0,b1st-minST);
+  const c1WrDis=Math.max(0,rivalMaxWr-b1wr);
+  const up=Math.min(1,c1StDis/.3*.5+c1WrDis/3*.5);
+  const acc=Math.round((VENUE_ACC[vname]||.69)*100);
+  const vd=document.getElementById('vdict');
+
+  if(up>=0.5){
+    vd.className='verdict show warn';
+    vd.innerHTML=`<div style="display:flex;gap:12px;align-items:center">
+      <div style="font-size:28px">⚡</div>
+      <div>
+        <div style="font-size:10px;color:#ffa500;letter-spacing:.1em">D — 荒れ予告レース</div>
+        <div style="font-size:16px;font-weight:900;margin:4px 0">万舟チャンス</div>
+        <div style="font-size:12px;color:#8899aa">荒れスコア ${Math.round(up*100)}/100 ｜ ${vname}精度 ${acc}%</div>
+      </div>
+    </div>`;
+  }else{
+    vd.className='verdict show go';
+    vd.innerHTML=`<div style="display:flex;gap:12px;align-items:center">
+      <div style="font-size:28px">🟢</div>
+      <div>
+        <div style="font-size:10px;color:#00cc66;letter-spacing:.1em">A — 手堅いレース</div>
+        <div style="font-size:16px;font-weight:900;margin:4px 0">1号艇有利 ・ 軸固定戦略</div>
+        <div style="font-size:12px;color:#8899aa">荒れスコア ${Math.round(up*100)}/100 ｜ ${vname}精度 ${acc}%</div>
+      </div>
+    </div>`;
+  }
+}
+
+function computeProbs(){
+  const inAdv=VENUE_ADV[vname]||.54;
+  const tansho=getTansho();
+  const stArr=boats.map(b=>getBI(b.boat).exh_st??b.avg_st??0.17);
+  const exhArr=boats.map(b=>getBI(b.boat).exh_time??6.85);
+  const exhMean=exhArr.reduce((a,x)=>a+x)/6;
+  const rawImpl={};
+  Object.entries(tansho).forEach(([b,o])=>{if(o>0)rawImpl[+b]=1/(o*TTAX)});
+  const impSum=Object.values(rawImpl).reduce((a,b)=>a+b)||1;
+  const impl={};boats.forEach(b=>{impl[b.boat]=rawImpl[b.boat]?rawImpl[b.boat]/impSum:1/6});
+  const minST=Math.min(...stArr);
+  const b1st=stArr[0]??0.17;
+  const b1wr=boats[0]?.national_win??5;
+  const rivalMaxWr=Math.max(...boats.slice(1).map(b=>b.national_win??5));
+  const upScore=Math.min(1,Math.max(0,b1st-minST)/.3*.5+Math.max(0,rivalMaxWr-b1wr)/3*.5);
+
+  const scores=boats.map((b,i)=>{
+    const c=b.boat;
+    const wr=b.national_win??5;
+    const g={A1:4,A2:3,B1:2,B2:1}[b.grade]||2;
+    const adjST=stArr[i]+((b.f_count||0)*.054);
+    const exhRel=exhMean-exhArr[i];
+    const sessWR=b.session_results?.filter(f=>f===1).length/(b.session_results?.length||1)||.17;
+    const va=b.venue_win_rate||.17;
+    const imp=impl[c]||1/6;
+    const inner=c>1?stArr[c-2]??0.17:0;
+    const innerDis=c>1?Math.max(0,inner-stArr[i]):0;
+    const mksB=[3,4,5].includes(c)?upScore*(4-Math.min(3,i+1))*.3:0;
+    return inAdv*(7-c)*(wr*.35+g*.25+imp*3*.15+sessWR*2*.1+va*3*.15)
+      -adjST*5+exhRel*2+imp*2.5+mksB+innerDis*3;
+  });
+  const mx=Math.max(...scores);
+  const exps=scores.map(s=>Math.exp(s-mx));
+  const sm=exps.reduce((a,b)=>a+b);
+  return exps.map(e=>e/sm);
+}
+
+function runPredict(){
+  show('result-area',false);
+  const probs=computeProbs();
+  const sorted=[...boats].map((b,i)=>({...b,prob:probs[i]})).sort((a,b)=>b.prob-a.prob);
+  const top3=sorted.slice(0,3).map(b=>b.boat);
+  const pm={};boats.forEach((b,i)=>{pm[b.boat]=probs[i]});
+  const tansho=getTansho();
+  const r2t=odds.rensho_2t||{};
+  const r3t=odds.rensho_3t||{};
+  const hasOdds=Object.values(tansho).some(v=>v>0);
+  const acc=Math.round((VENUE_ACC[vname]||.69)*100);
+
+  // 確率バー
+  document.getElementById('prob-area').innerHTML=sorted.map((b,i)=>{
+    const bi=getBI(b.boat);
+    return`<div style="display:grid;grid-template-columns:24px 1fr 80px 48px;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04)">
+      <div style="font-weight:900;color:#ffd000">${MK[i]||''}</div>
+      <div>
+        <div style="font-size:12px;font-weight:700">
+          <span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:${BG[b.boat-1]};color:${BT[b.boat-1]};font-size:10px;font-weight:900;margin-right:4px">${b.boat}</span>
+          ${b.name||'—'}
+        </div>
+        <div style="font-size:10px;color:#556a88">${b.grade} ${(b.national_win||0).toFixed(2)}${bi.exh_time?` 展T${bi.exh_time.toFixed(2)}`:''}</div>
+        <div class="prob-bar"><div class="prob-fill" style="width:${(b.prob*100).toFixed(1)}%;background:${BG[b.boat-1]}"></div></div>
+      </div>
+      <div style="font-size:10px;color:#556a88"></div>
+      <div style="font-family:monospace;font-size:13px;font-weight:700;text-align:right">${(b.prob*100).toFixed(1)}%</div>
+    </div>`;
+  }).join('');
+
+  // ROI
+  const topP=sorted[0].prob;
+  const topO=parseFloat(tansho[sorted[0].boat]||tansho[String(sorted[0].boat)]||0);
+  const estROI=topO>0?topP*topO*TTAX:null;
+  const stArr=boats.map(b=>getBI(b.boat).exh_st??b.avg_st??0.17);
+  const minST=Math.min(...stArr);
+  const b1st=stArr[0]??0.17;
+  const b1wr=boats[0]?.national_win??5;
+  const rivalMaxWr=Math.max(...boats.slice(1).map(b=>b.national_win??5));
+  const upScore=Math.min(1,Math.max(0,b1st-minST)/.3*.5+Math.max(0,rivalMaxWr-b1wr)/3*.5);
+  let rtype,rcol;
+  if(upScore>=.5){rtype='D 荒れ予告';rcol='#ffa500'}
+  else if(topP>=.7){rtype='A 鉄板';rcol='#00cc66'}
+  else{rtype='B 手堅い';rcol='#55aaff'}
+
+  document.getElementById('roi-area').innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div style="background:rgba(255,255,255,.03);border-radius:6px;padding:12px">
+        <div style="font-size:9px;color:#556a88;margin-bottom:4px">レースタイプ</div>
+        <div style="font-size:15px;font-weight:900;color:${rcol}">${rtype}</div>
+      </div>
+      <div style="background:rgba(255,255,255,.03);border-radius:6px;padding:12px">
+        <div style="font-size:9px;color:#556a88;margin-bottom:4px">本命確率</div>
+        <div style="font-size:18px;font-weight:900">${(topP*100).toFixed(1)}%</div>
+        <div style="font-size:10px;color:#556a88">${sorted[0].name} ${sorted[0].boat}号艇</div>
+      </div>
+      <div style="background:rgba(255,255,255,.03);border-radius:6px;padding:12px">
+        <div style="font-size:9px;color:#556a88;margin-bottom:4px">単勝回収率（推定）</div>
+        <div style="font-size:18px;font-weight:900;color:${estROI?estROI>=1?'#00cc66':'#ff3355':'#556a88'}">${estROI?Math.round(estROI*100)+'%':'未確定'}</div>
+        <div style="font-size:10px;color:#556a88">${topO?topO.toFixed(1)+'倍':'オッズ待ち'}</div>
+      </div>
+      <div style="background:rgba(255,255,255,.03);border-radius:6px;padding:12px">
+        <div style="font-size:9px;color:#556a88;margin-bottom:4px">${vname}のAI精度</div>
+        <div style="font-size:18px;font-weight:900;color:${acc>=70?'#00cc66':acc<60?'#ff3355':'#dde8ff'}">${acc}%</div>
+      </div>
+    </div>`;
+
+  // EV計算
+  const bets=[];
+  if(hasOdds){
+    boats.forEach((b,i)=>{
+      const o=parseFloat(tansho[b.boat]||tansho[String(b.boat)]||0);
+      if(!o)return;
+      const ev=probs[i]*o*TTAX;
+      if(ev<MEV)return;
+      const k=Math.max(0,(probs[i]*o-1)/(o-1))*KL;
+      bets.push({type:'単勝',label:`${b.boat}号艇 ${b.name}`,odds:o,ev,amt:Math.max(100,Math.floor(10000*k/100)*100)});
+    });
+    for(const a of top3)for(const b of top3){
+      if(a===b)continue;
+      const o=parseFloat(r2t[[a,b]]||r2t[`${a},${b}`]||0);
+      if(!o)continue;
+      const pa=pm[a],pb=pm[b];
+      const p2=pa*(pb/(1-pa+1e-9));
+      const ev=p2*o*RTAX;
+      if(ev<MEV)continue;
+      const k=Math.max(0,(p2*o-1)/(o-1))*KL;
+      bets.push({type:'2連単',label:`${a}-${b}`,odds:o,ev,amt:Math.max(100,Math.floor(10000*k/100)*100)});
+    }
+    const perms=[];
+    for(const a of top3)for(const b of top3)for(const c of top3)
+      if(new Set([a,b,c]).size===3)perms.push([a,b,c]);
+    for(const[a,b,c]of perms){
+      const o=parseFloat(r3t[[a,b,c]]||r3t[`${a},${b},${c}`]||0);
+      if(!o)continue;
+      const pa=pm[a],pb=pm[b],pc=pm[c];
+      const p3=pa*(pb/(1-pa+1e-9))*(pc/(1-pa-pb+1e-9));
+      const ev=p3*o*RTAX;
+      if(ev<MEV)continue;
+      const k=Math.max(0,(p3*o-1)/(o-1))*KL;
+      bets.push({type:'3連単',label:`${a}-${b}-${c}`,odds:o,ev,amt:Math.max(100,Math.floor(10000*k/100)*100)});
+    }
+    bets.sort((a,b)=>b.ev-a.ev);
+  }
+
+  const evCard=document.getElementById('ev-card');
+  if(bets.length>0){
+    evCard.style.display='block';
+    document.getElementById('ev-area').innerHTML=bets.slice(0,5).map(b=>`
+      <div class="ev-row">
+        <div><div style="font-weight:700">${b.label}</div><div style="font-size:10px;color:#556a88">${b.type} ${b.odds.toFixed(1)}倍</div></div>
+        <div style="text-align:right">
+          <div class="${b.ev>=1.2?'ev-plus':'ev-warn'}">EV ${b.ev.toFixed(2)}</div>
+          <div class="amt">${b.amt.toLocaleString()}円</div>
+        </div>
+      </div>`).join('');
+  }else{
+    evCard.style.display='block';
+    document.getElementById('ev-area').innerHTML=`<div style="color:#556a88;font-size:12px;padding:8px 0">${hasOdds?'全EVマイナス → 見送り推奨':'オッズ確定後に計算します'}</div>`;
+  }
+
+  // 荒れ因子
+  const factors=[];
+  if(upScore>=.3){
+    boats.forEach((b,i)=>{
+      if(b.boat===1)return;
+      const bi=getBI(b.boat);
+      const st=bi.exh_st??b.avg_st??0.17;
+      if(b.boat===2&&st<(stArr[0]??0.17)){
+        factors.push({boat:b.boat,name:b.name,role:'差し軸',why:`2コースST${st.toFixed(2)}、1号艇より速い`});
+      }
+      if([3,4].includes(b.boat)&&st<=minST+.02){
+        factors.push({boat:b.boat,name:b.name,role:'まくり軸',why:`${b.boat}コースST最速クラス（${st.toFixed(2)}）`});
+      }
+    });
+  }
+  const upc=document.getElementById('upset-card');
+  if(factors.length>0){
+    upc.style.display='block';
+    document.getElementById('upset-area').innerHTML=factors.map(f=>`
+      <div style="display:flex;gap:10px;align-items:center;padding:10px;background:rgba(255,255,255,.03);border-radius:5px;border-left:3px solid #ffa500;margin-bottom:8px">
+        <div style="width:28px;height:28px;border-radius:50%;background:${BG[f.boat-1]};color:${BT[f.boat-1]};display:flex;align-items:center;justify-content:center;font-weight:900;font-size:12px;flex-shrink:0">${f.boat}</div>
+        <div style="flex:1">
+          <div style="font-size:12px;font-weight:700">${f.name}</div>
+          <div style="font-size:11px;color:#8899aa">${f.why}</div>
+        </div>
+        <div style="font-size:10px;font-weight:700;color:#ffa500;background:rgba(255,165,0,.15);padding:2px 8px;border-radius:2px">${f.role}</div>
+      </div>`).join('');
+  }else{
+    upc.style.display='none';
+  }
+
+  show('result-area');
+  document.getElementById('result-area').scrollIntoView({behavior:'smooth',block:'start'});
+}
+</script>
+</body>
+</html>

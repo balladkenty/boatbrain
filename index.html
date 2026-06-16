@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BOAT BRAIN</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:sans-serif;background:#05080f;color:#dde8ff;min-height:100vh}
+nav{background:#0c1420;border-bottom:1px solid #1e3654;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10}
+.logo{font-size:15px;font-weight:900;color:#55aaff}
+.app{max-width:780px;margin:0 auto;padding:14px}
+.card{background:rgba(255,255,255,.04);border:1px solid #1e3654;border-radius:8px;padding:14px;margin-bottom:10px}
+label{font-size:11px;color:#556a88;display:block;margin-bottom:4px}
+select,input{background:#0c1420;border:1px solid #1e3654;color:#dde8ff;padding:8px;border-radius:4px;font-size:13px;width:100%}
+.grid4{display:grid;grid-template-columns:1fr 72px 72px 72px;gap:8px;margin-bottom:10px}
+.btn{border:none;padding:12px;border-radius:4px;font-size:14px;font-weight:700;cursor:pointer;width:100%;margin-bottom:10px}
+.btn-get{background:#1e3654;color:#55aaff}
+.btn-ai{background:linear-gradient(135deg,#0a3580,#2878f0);color:#fff;display:none}
+.btn-ai.on{display:block}
+#loading{display:none;text-align:center;padding:20px;color:#556a88;font-size:13px}
+
+/* 展示バナー */
+.exh-wrap{display:none;background:rgba(0,212,184,.07);border:1px solid rgba(0,212,184,.25);border-radius:8px;padding:14px;margin-bottom:10px}
+.exh-wrap.on{display:block}
+.exh-title{font-size:10px;color:#00d4b8;letter-spacing:.1em;margin-bottom:10px}
+.exh-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.exh-cell{background:rgba(255,255,255,.04);border-radius:6px;padding:10px;text-align:center}
+.exh-cell.best{background:rgba(0,212,184,.12);border:1px solid rgba(0,212,184,.3)}
+.exh-cell.fwarn{background:rgba(255,51,85,.1);border:1px solid rgba(255,51,85,.3)}
+.eb-no{width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:900;font-size:11px;margin-bottom:5px}
+.eb-st{font-size:20px;font-weight:900;font-family:monospace}
+.eb-t{font-size:12px;color:#8899aa;margin-top:1px}
+.eb-nm{font-size:10px;color:#8899aa;margin-top:3px}
+.eb-mk{font-size:9px;font-weight:700;color:#00d4b8;margin-top:2px}
+
+/* 判定 */
+.verdict{display:none;border-radius:8px;padding:14px;margin-bottom:10px}
+.verdict.on{display:block}
+.v-wait{background:rgba(255,255,255,.03);border:1px solid #1e3654}
+.v-go{background:rgba(0,204,102,.06);border:1px solid rgba(0,204,102,.2)}
+.v-warn{background:rgba(255,153,0,.06);border:1px solid rgba(255,153,0,.2)}
+
+/* 出走表 */
+#race-card{display:none}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{color:#556a88;font-size:10px;padding:5px 2px;text-align:center;border-bottom:1px solid #1e3654}
+th:nth-child(2){text-align:left}
+td{padding:7px 2px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04)}
+td:nth-child(2){text-align:left}
+.bn{width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:900;font-size:11px}
+.c-hi{color:#00d4b8;font-weight:700}
+.c-live{color:#55aaff}
+.c-dim{color:#556a88}
+.ftag{font-size:8px;background:#ff3355;color:#fff;padding:1px 3px;border-radius:2px;margin-left:2px}
+.tag{display:inline-block;font-size:9px;padding:2px 6px;border-radius:2px;margin-right:4px}
+.t-on{background:rgba(0,204,102,.12);color:#00cc66;border:1px solid rgba(0,204,102,.25)}
+.t-off{background:rgba(255,255,255,.05);color:#556a88}
+
+/* 結果 */
+#result-area{display:none}
+.prob-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.03)}
+.prob-row:last-child{border-bottom:none}
+.prob-mk{font-size:13px;font-weight:900;color:#ffd000;width:18px}
+.prob-info{flex:1}
+.prob-nm{font-size:12px;font-weight:700}
+.prob-sub{font-size:10px;color:#556a88}
+.prob-bar{height:4px;background:rgba(255,255,255,.06);border-radius:2px;margin-top:4px;overflow:hidden}
+.prob-fill{height:100%;border-radius:2px}
+.prob-pct{font-size:13px;font-weight:700;font-family:monospace;min-width:44px;text-align:right}
+
+.bet-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.bet-box{background:rgba(255,255,255,.04);border:1px solid #1e3654;border-radius:6px;padding:12px}
+.bet-lbl{font-size:9px;color:#556a88;letter-spacing:.1em;margin-bottom:6px}
+.bet-combo{font-size:22px;font-weight:900}
+.bet-odds{font-size:11px;color:#55aaff;margin-top:4px}
+.bet-ev{font-size:10px;margin-top:2px}
+.ev-p{color:#00cc66} .ev-w{color:#ffa500} .ev-n{color:#556a88}
+
+.roi-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.roi-box{background:rgba(255,255,255,.03);border-radius:6px;padding:11px}
+.roi-lbl{font-size:9px;color:#556a88;margin-bottom:4px}
+.roi-val{font-size:18px;font-weight:900}
+.roi-sub{font-size:10px;color:#556a88;margin-top:3px}
+
+.factor{display:flex;gap:10px;align-items:flex-start;padding:10px;background:rgba(255,255,255,.03);border-radius:5px;border-left:3px solid #ffa500;margin-bottom:7px}
+.f-role{font-size:9px;font-weight:700;color:#ffa500;background:rgba(255,165,0,.12);padding:2px 7px;border-radius:2px;white-space:nowrap;margin-top:1px;flex-shrink:0}
+</style>
+</head>
+<body>
+<nav>
+  <div class="logo">BOATBRAIN</div>
+  <div id="cl" style="font-size:12px;color:#556a88"></div>
+</nav>
+<div class="app">
+
+  <div class="card">
+    <div class="grid4">
+      <div><label>会場</label>
+        <select id="sv">
+          <option value="24">大村</option><option value="1">桐生</option>
+          <option value="2">戸田</option><option value="3">江戸川</option>
+          <option value="4">平和島</option><option value="5">多摩川</option>
+          <option value="6">浜名湖</option><option value="7">蒲郡</option>
+          <option value="8">常滑</option><option value="9">津</option>
+          <option value="10">三国</option><option value="11">びわこ</option>
+          <option value="12">住之江</option><option value="13">尼崎</option>
+          <option value="14">鳴門</option><option value="15">丸亀</option>
+          <option value="16">児島</option><option value="17">宮島</option>
+          <option value="18">徳山</option><option value="19">下関</option>
+          <option value="20">若松</option><option value="21">芦屋</option>
+          <option value="22">福岡</option><option value="23">唐津</option>
+        </select>
+      </div>
+      <div><label>R</label>
+        <select id="sr">
+          <option>1</option><option>2</option><option>3</option><option>4</option>
+          <option>5</option><option>6</option><option>7</option><option>8</option>
+          <option>9</option><option>10</option><option>11</option><option>12</option>
+        </select>
+      </div>
+      <div><label>風速m</label><input type="number" id="iw" value="2" min="0" max="20"></div>
+      <div><label>波高cm</label><input type="number" id="iv" value="2" min="0" max="50"></div>
+    </div>
+    <button class="btn btn-get" id="btn-get" onclick="fetchData()">出走表・展示・オッズを取得</button>
+  </div>
+
+  <div id="loading">データ取得中...</div>
+  <div class="exh-wrap" id="exh-wrap"><div class="exh-title">📊 展示情報 — リアルタイム反映済み</div><div class="exh-grid" id="exh-grid"></div></div>
+  <div class="verdict" id="verdict"></div>
+  <div id="race-card"><div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><div style="font-weight:700;font-size:14px" id="race-title"></div><div id="race-chips"></div></div><table><thead><tr><th></th><th>選手</th><th>勝率</th><th>展示ST</th><th>展示T</th><th>当地%</th><th>単勝</th></tr></thead><tbody id="tbody"></tbody></table></div></div>
+  <button class="btn btn-ai" id="btn-ai" onclick="runPredict()">AI予測を実行</button>
+  <div id="result-area">
+    <div class="card"><div style="font-size:10px;color:#556a88;margin-bottom:10px">AI予測確率</div><div id="prob-area"></div></div>
+    <div style="font-size:10px;color:#556a88;margin-bottom:8px">推奨買い目</div>
+    <div class="bet-grid" id="bet-grid"></div>
+    <div class="card"><div style="font-size:10px;color:#556a88;margin-bottom:10px" id="ev-title">期待値</div><div id="ev-area"></div></div>
+    <div class="card"><div style="font-size:10px;color:#556a88;margin-bottom:10px">回収率分析</div><div class="roi-grid" id="roi-grid"></div></div>
+    <div class="card" id="factor-card" style="display:none"><div style="font-size:10px;color:#ffa500;margin-bottom:10px">▶ 荒れ因子</div><div id="factor-area"></div></div>
+  </div>
+
+</div>
+<script>
+const API='https://boatbrain.onrender.com';
+const BG=['#fff','#111','#e63946','#2878f0','#ffd000','#2ecc71'];
+const BT=['#111','#fff','#fff','#fff','#111','#111'];
+const MK=['◎','○','△','','',''];
+const VADV={"大村":.671,"住之江":.598,"尼崎":.590,"徳山":.582,"下関":.578,"常滑":.573,"蒲郡":.571,"唐津":.570,"芦屋":.565,"若松":.562,"福岡":.559,"宮島":.554,"多摩川":.549,"桐生":.545,"鳴門":.540,"丸亀":.538,"平和島":.535,"浜名湖":.530,"三国":.528,"児島":.525,"津":.520,"びわこ":.515,"戸田":.480,"江戸川":.455};
+const VACC={"大村":.716,"尼崎":.818,"住之江":.749,"常滑":.750,"福岡":.774,"徳山":.736,"若松":.725,"桐生":.726,"多摩川":.722,"浜名湖":.718,"児島":.714,"平和島":.697,"びわこ":.683,"鳴門":.692,"唐津":.682,"芦屋":.679,"丸亀":.655,"蒲郡":.650,"津":.649,"宮島":.644,"三国":.583,"戸田":.577,"江戸川":.551};
+const CV={"24":"大村","1":"桐生","2":"戸田","3":"江戸川","4":"平和島","5":"多摩川","6":"浜名湖","7":"蒲郡","8":"常滑","9":"津","10":"三国","11":"びわこ","12":"住之江","13":"尼崎","14":"鳴門","15":"丸亀","16":"児島","17":"宮島","18":"徳山","19":"下関","20":"若松","21":"芦屋","22":"福岡","23":"唐津"};
+const TTAX=.75,RTAX=.725,KL=.25,MEV=1.05;
+
+let boats=[],before={},odds={},jcd=24,rno=1,vname='大村';
+
+function g(id){return document.getElementById(id)}
+function show(id){g(id).style.display='block'}
+function hide(id){g(id).style.display='none'}
+
+setInterval(function(){
+  var t=new Date();
+  g('cl').textContent=String(t.getHours()).padStart(2,'0')+':'+String(t.getMinutes()).padStart(2,'0');
+},1000);
+
+
+
+function bi(b){return before[b]||before[String(b)]||{}}
+function ts(){return odds.tansho||{}}
+
+async function sf(url){
+  try{
+    var r=await fetch(url);
+    return await r.json();
+  }catch(e){
+    return null;
+  }
+}
+
+async function fetchData(){
+  jcd=parseInt(g('sv').value);
+  rno=parseInt(g('sr').value);
+  vname=CV[String(jcd)]||'大村';
+  boats=[];before={};odds={};
+
+  g('exh-wrap').classList.remove('on');
+  g('verdict').classList.remove('on');
+  hide('race-card');
+  hide('result-area');
+  g('btn-ai').classList.remove('on');
+  show('loading');
+
+  var hd=new Date().toISOString().slice(0,10).replace(/-/g,'');
+
+  var rl=await sf(API+'/api/racelist?jcd='+jcd+'&rno='+rno+'&date='+hd);
+  if(!rl||!rl.boats){hide('loading');alert('出走表取得失敗');return;}
+  boats=rl.boats;
+
+  var br=await sf(API+'/api/before?jcd='+jcd+'&rno='+rno+'&date='+hd);
+  if(br&&br.before)before=br.before;
+
+  var od=await sf(API+'/api/odds?jcd='+jcd+'&rno='+rno+'&date='+hd);
+  if(od)odds=od.odds||od;
+
+  hide('loading');
+  drawExh();
+  drawVerdict();
+  drawBoats();
+  show('race-card');
+  g('btn-ai').classList.add('on');
+}
+
+function drawExh(){
+  var stArr=boats.map(function(b){
+    var v=bi(b.boat).exh_st;
+    return (v!=null&&v<0.49)?v:null;
+  });
+  var exArr=boats.map(function(b){
+    var v=bi(b.boat).exh_time;
+    return (v!=null&&v>6)?v:null;
+  });
+  var hasEx=exArr.some(function(v){return v!=null;});
+  if(!hasEx){g('exh-wrap').classList.remove('on');return;}
+
+  var validST=stArr.filter(function(v){return v!=null;});
+  var validEx=exArr.filter(function(v){return v!=null;});
+  var minST=validST.length?Math.min.apply(null,validST):99;
+  var minEx=validEx.length?Math.min.apply(null,validEx):99;
+
+  g('exh-grid').innerHTML=boats.map(function(b,i){
+    var st=stArr[i],ex=exArr[i];
+    var isF=b.f_count>0;
+    var bestST=st!=null&&Math.abs(st-minST)<.005;
+    var bestEx=ex!=null&&Math.abs(ex-minEx)<.005;
+    var cls=isF?'fwarn':bestST||bestEx?'best':'';
+    return '<div class="exh-cell '+cls+'">'
+      +'<div class="eb-no" style="background:'+BG[i]+';color:'+BT[i]+'">'+b.boat+'</div>'
+      +'<div class="eb-st" style="color:'+(bestST?'#00d4b8':isF?'#ff3355':'#dde8ff')+'">'
+      +(st!=null?'.'+String(Math.round(st*100)).padStart(2,'0'):'—')
+      +(isF?'<span style="font-size:10px;color:#ff3355"> F</span>':'')+'</div>'
+      +'<div class="eb-t" style="color:'+(bestEx?'#00d4b8':'#8899aa')+'">'+(ex!=null?ex.toFixed(2):'—')+'</div>'
+      +'<div class="eb-nm">'+(b.name||'').split(/\s+/)[0]+'</div>'
+      +(bestST?'<div class="eb-mk">ST最速</div>':'')
+      +(bestEx?'<div class="eb-mk">展示最速</div>':'')
+      +(isF?'<div style="font-size:9px;color:#ff3355">F補正済み</div>':'')
+      +'</div>';
+  }).join('');
+  g('exh-wrap').classList.add('on');
+}
+
+function drawVerdict(){
+  var hasBefore=Object.values(before).some(function(v){return v&&v.exh_time&&v.exh_time>6;});
+  var tansho=ts();
+  var hasOdds=Object.values(tansho).some(function(v){return v>0;});
+  var acc=Math.round((VACC[vname]||.69)*100);
+  var vd=g('verdict');
+
+  if(!hasBefore){
+    vd.className='verdict on v-wait';
+    vd.innerHTML='<div style="display:flex;gap:10px;align-items:center">'
+      +'<div style="font-size:24px">⏳</div>'
+      +'<div><div style="font-size:9px;color:#556a88;letter-spacing:.1em">展示情報待ち</div>'
+      +'<div style="font-size:15px;font-weight:900;margin:3px 0">発走15〜30分前に再取得</div>'
+      +'<div style="font-size:11px;color:#8899aa">展示ST・展示タイム取得後に荒れ判定を表示します</div></div></div>'
+      +'<div style="margin-top:10px">'
+      +'<span class="tag t-off">展示未取得</span>'
+      +'<span class="tag '+(hasOdds?'t-on':'t-off')+'">オッズ'+(hasOdds?'確定':'未確定')+'</span>'
+      +'<span class="tag t-off">'+vname+'精度 '+acc+'%</span></div>';
+    return;
+  }
+
+  var stArr=boats.map(function(b){return bi(b.boat).exh_st||b.avg_st||0.17;});
+  var minST=Math.min.apply(null,stArr);
+  var b1st=stArr[0]||0.17;
+  var b1wr=boats[0]?boats[0].national_win||5:5;
+  var rmx=Math.max.apply(null,boats.slice(1).map(function(b){return b.national_win||5;}));
+  var up=Math.min(1,Math.max(0,b1st-minST)/.3*.5+Math.max(0,rmx-b1wr)/3*.5);
+
+  var cls,icon,type,title,desc;
+  if(up>=.5){cls='v-warn';icon='⚡';type='D — 荒れ予告';title='万舟チャンス';desc='荒れスコア'+Math.round(up*100)+'/100。外コース軸の万舟を検討。';}
+  else if(up>=.25){cls='v-warn';icon='🌊';type='C — 混戦';title='取捨選択が必要';desc='荒れスコア'+Math.round(up*100)+'/100。EV確認後に判断。';}
+  else{cls='v-go';icon='🟢';type='A — 手堅い';title='1号艇有利';desc='荒れスコア'+Math.round(up*100)+'/100。イン逃げ有力。';}
+
+  vd.className='verdict on '+cls;
+  vd.innerHTML='<div style="display:flex;gap:10px;align-items:center;margin-bottom:8px">'
+    +'<div style="font-size:24px">'+icon+'</div>'
+    +'<div><div style="font-size:9px;letter-spacing:.1em;color:'+(cls==='v-go'?'#00cc66':'#ffa500')+'">'+type+'</div>'
+    +'<div style="font-size:16px;font-weight:900;margin:3px 0">'+title+'</div></div></div>'
+    +'<div style="font-size:12px;color:#8899aa;margin-bottom:8px">'+desc+'</div>'
+    +'<div>'
+    +'<span class="tag t-on">展示反映済み</span>'
+    +'<span class="tag '+(hasOdds?'t-on':'t-off')+'">オッズ'+(hasOdds?'確定':'未確定')+'</span>'
+    +'<span class="tag t-off">'+vname+'精度 '+acc+'%</span></div>';
+}
+
+function drawBoats(){
+  var tansho=ts();
+  var stArr=boats.map(function(b){var v=bi(b.boat).exh_st;return (v!=null&&v<0.49)?v:null;});
+  var exArr=boats.map(function(b){var v=bi(b.boat).exh_time;return (v!=null&&v>6)?v:null;});
+  var validEx=exArr.filter(function(v){return v!=null;});
+  var hasBefore=validEx.length>0;
+  var hasOdds=Object.values(tansho).some(function(v){return v>0;});
+  var minST=stArr.some(function(v){return v!=null;})?Math.min.apply(null,stArr.filter(function(v){return v!=null;})):99;
+  var minEx=validEx.length?Math.min.apply(null,validEx):99;
+
+  g('race-title').textContent=vname+' '+rno+'R';
+  g('race-chips').innerHTML=(hasOdds?'<span class="tag t-on">LIVE</span>':'')
+    +(hasBefore?'<span class="tag t-on">展示済み</span>':'<span class="tag t-off">展示前</span>');
+
+  g('tbody').innerHTML=boats.map(function(b,i){
+    var st=stArr[i],ex=exArr[i];
+    var o=tansho[b.boat]||tansho[String(b.boat)];
+    var va=Math.round((b.venue_win_rate||.17)*100);
+    var isF=b.f_count>0;
+    var bST=st!=null&&Math.abs(st-minST)<.005;
+    var bEx=ex!=null&&Math.abs(ex-minEx)<.005;
+    return '<tr>'
+      +'<td><div class="bn" style="background:'+BG[i]+';color:'+BT[i]+'">'+b.boat+'</div></td>'
+      +'<td><div style="font-size:12px;font-weight:700">'+b.name+(isF?'<span class="ftag">F'+b.f_count+'</span>':'')+'</div>'
+      +'<div style="font-size:9px;color:#556a88">'+b.grade+' 節内:'+(b.session_results||[]).slice(-3).join('-')+'</div></td>'
+      +'<td>'+(b.national_win||0).toFixed(2)+'</td>'
+      +'<td class="'+(bST?'c-hi':st!=null?'c-live':'c-dim')+'">'+(st!=null?'.'+String(Math.round(st*100)).padStart(2,'0'):'—')+'</td>'
+      +'<td class="'+(bEx?'c-hi':ex!=null?'c-live':'c-dim')+'">'+(ex!=null?ex.toFixed(2):'—')+'</td>'
+      +'<td style="color:'+(va>25?'#00d4b8':'#dde8ff')+'">'+va+'%</td>'
+      +'<td style="color:'+(o&&o>0?o>8?'#ffd000':'#dde8ff':'#556a88')+'">'+(o&&o>0?o.toFixed(1)+'倍':'—')+'</td>'
+      +'</tr>';
+  }).join('');
+}
+
+function computeProbs(){
+  var inAdv=VADV[vname]||.54;
+  var tansho=ts();
+  var stArr=boats.map(function(b){return bi(b.boat).exh_st||b.avg_st||0.17;});
+  var exArr=boats.map(function(b){return bi(b.boat).exh_time||6.85;});
+  var exMean=exArr.reduce(function(a,x){return a+x;},0)/6;
+  var rawImp={};
+  Object.keys(tansho).forEach(function(b){var o=tansho[b];if(o>0)rawImp[+b]=1/(o*TTAX);});
+  var impS=Object.values(rawImp).reduce(function(a,b){return a+b;},0)||1;
+  var imp={};boats.forEach(function(b){imp[b.boat]=rawImp[b.boat]?rawImp[b.boat]/impS:1/6;});
+  var minST=Math.min.apply(null,stArr);
+  var b1st=stArr[0]||0.17;
+  var b1wr=boats[0]?boats[0].national_win||5:5;
+  var rmx=Math.max.apply(null,boats.slice(1).map(function(b){return b.national_win||5;}));
+  var up=Math.min(1,Math.max(0,b1st-minST)/.3*.5+Math.max(0,rmx-b1wr)/3*.5);
+
+  var sc=boats.map(function(b,i){
+    var c=b.boat,wr=b.national_win||5;
+    var gr={A1:4,A2:3,B1:2,B2:1}[b.grade]||2;
+    var adjST=stArr[i]+((b.f_count||0)*.054);
+    var exRel=exMean-exArr[i];
+    var sess=b.session_results||[];
+    var sessWR=sess.filter(function(f){return f===1;}).length/(sess.length||1)||.17;
+    var va=b.venue_win_rate||.17;
+    var ip=imp[c]||1/6;
+    var inner=c>1?stArr[c-2]||0.17:0;
+    var iDis=c>1?Math.max(0,inner-stArr[i]):0;
+    var mksB=[3,4,5].indexOf(c)>=0?up*(4-Math.min(3,i+1))*.3:0;
+    return inAdv*(7-c)*(wr*.35+gr*.25+ip*3*.15+sessWR*2*.1+va*3*.15)-adjST*5+exRel*2+ip*2.5+mksB+iDis*3;
+  });
+  var mx=Math.max.apply(null,sc);
+  var ex=sc.map(function(s){return Math.exp(s-mx);});
+  var sm=ex.reduce(function(a,b){return a+b;},0);
+  return ex.map(function(e){return e/sm;});
+}
+
+function runPredict(){
+  var probs=computeProbs();
+  var sorted=boats.map(function(b,i){return {boat:b,prob:probs[i]};}).sort(function(a,b){return b.prob-a.prob;});
+  var top3=sorted.slice(0,3).map(function(x){return x.boat.boat;});
+  var w=top3[0],p=top3[1],s=top3[2];
+  var pm={};boats.forEach(function(b,i){pm[b.boat]=probs[i];});
+  var tansho=ts();
+  var r2t=odds.rensho_2t||{};
+  var r3t=odds.rensho_3t||{};
+  var hasOdds=Object.values(tansho).some(function(v){return v>0;});
+  var acc=Math.round((VACC[vname]||.69)*100);
+
+  // 確率
+  g('prob-area').innerHTML=sorted.map(function(x,i){
+    var b=x.boat,prob=x.prob;
+    var bx=bi(b.boat);
+    return '<div class="prob-row">'
+      +'<div class="prob-mk">'+(MK[i]||'')+'</div>'
+      +'<div class="prob-info">'
+      +'<div class="prob-nm"><span style="display:inline-flex;align-items:center;justify-content:center;width:19px;height:19px;border-radius:50%;background:'+BG[b.boat-1]+';color:'+BT[b.boat-1]+';font-size:10px;font-weight:900;margin-right:4px">'+b.boat+'</span>'+b.name+'</div>'
+      +'<div class="prob-sub">'+b.grade+(bx.exh_time?' 展T'+bx.exh_time.toFixed(2):'')+(bx.exh_st!=null?' ST.'+String(Math.round(bx.exh_st*100)).padStart(2,'0'):'')+'</div>'
+      +'<div class="prob-bar"><div class="prob-fill" style="width:'+(prob*100).toFixed(1)+'%;background:'+BG[b.boat-1]+'"></div></div>'
+      +'</div>'
+      +'<div class="prob-pct">'+(prob*100).toFixed(1)+'%</div>'
+      +'</div>';
+  }).join('');
+
+  // 買い目
+  function g2(a,b){return parseFloat(r2t[[a,b]]||r2t[a+','+b]||0);}
+  function g3(a,b,c){return parseFloat(r3t[[a,b,c]]||r3t[a+','+b+','+c]||0);}
+  function tp2(a,b){var pa=pm[a],pb=pm[b];return pa*(pb/(1-pa+1e-9));}
+  function tp3(a,b,c){var pa=pm[a],pb=pm[b],pc=pm[c];return pa*(pb/(1-pa+1e-9))*(pc/(1-pa-pb+1e-9));}
+  var bets=[
+    {lbl:'3連単',combo:w+'-'+p+'-'+s,o:g3(w,p,s),prob:tp3(w,p,s),tax:RTAX},
+    {lbl:'3連単',combo:w+'-'+s+'-'+p,o:g3(w,s,p),prob:tp3(w,s,p),tax:RTAX},
+    {lbl:'2連単',combo:w+'-'+p,o:g2(w,p),prob:tp2(w,p),tax:RTAX},
+    {lbl:'2連単',combo:w+'-'+s,o:g2(w,s),prob:tp2(w,s),tax:RTAX},
+  ];
+  g('bet-grid').innerHTML=bets.map(function(b){
+    var ev=b.o>0?b.prob*b.o*b.tax:null;
+    var ec=ev?ev>=MEV?'ev-p':ev>=.8?'ev-w':'ev-n':'ev-n';
+    return '<div class="bet-box">'
+      +'<div class="bet-lbl">'+b.lbl+'</div>'
+      +'<div class="bet-combo">'+b.combo+'</div>'
+      +'<div class="bet-odds">'+(b.o>0?b.o.toFixed(1)+'倍':'未確定')+'</div>'
+      +'<div class="bet-ev '+ec+'">'+(ev?'EV '+ev.toFixed(2):'EV—')+'</div>'
+      +'</div>';
+  }).join('');
+
+  // EV
+  var evBets=[];
+  if(hasOdds){
+    boats.forEach(function(b,i){
+      var o=parseFloat(tansho[b.boat]||tansho[String(b.boat)]||0);
+      if(!o)return;
+      var ev=probs[i]*o*TTAX;
+      if(ev<MEV)return;
+      var k=Math.max(0,(probs[i]*o-1)/(o-1))*KL;
+      evBets.push({type:'単勝',label:b.boat+'号艇 '+b.name,odds:o,ev:ev,amt:Math.max(100,Math.floor(10000*k/100)*100)});
+    });
+    top3.forEach(function(a){top3.forEach(function(b){
+      if(a===b)return;
+      var o=g2(a,b);if(!o)return;
+      var p2=tp2(a,b);var ev=p2*o*RTAX;if(ev<MEV)return;
+      var k=Math.max(0,(p2*o-1)/(o-1))*KL;
+      evBets.push({type:'2連単',label:a+'-'+b,odds:o,ev:ev,amt:Math.max(100,Math.floor(10000*k/100)*100)});
+    });});
+    evBets.sort(function(a,b){return b.ev-a.ev;});
+  }
+
+  if(evBets.length>0){
+    g('ev-title').textContent='★ 期待値プラス買い目 ('+Math.min(evBets.length,5)+'件)';
+    g('ev-area').innerHTML=evBets.slice(0,5).map(function(b){
+      return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.03)">'
+        +'<div><div style="font-size:13px;font-weight:700">'+b.label+'</div>'
+        +'<div style="font-size:10px;color:#556a88">'+b.type+' '+b.odds.toFixed(1)+'倍</div></div>'
+        +'<div style="text-align:right">'
+        +'<div style="font-size:13px;font-weight:700;color:'+(b.ev>=1.2?'#00cc66':'#ffa500')+'">EV '+b.ev.toFixed(2)+'</div>'
+        +'<div style="font-size:10px;font-weight:900;background:'+(b.ev>=1.2?'#00cc66':'#ffa500')+';color:'+(b.ev>=1.2?'#05080f':'#111')+';padding:2px 8px;border-radius:2px">'+b.amt.toLocaleString()+'円</div>'
+        +'</div></div>';
+    }).join('');
+  }else{
+    g('ev-title').textContent='EV推奨買い目';
+    g('ev-area').innerHTML='<div style="color:#556a88;font-size:12px;padding:8px 0">'+(hasOdds?'全EVマイナス → 見送り推奨':'オッズ確定後にEVを計算')+'</div>';
+  }
+
+  // ROI
+  var topP=sorted[0].prob;
+  var topO=parseFloat(tansho[sorted[0].boat.boat]||tansho[String(sorted[0].boat.boat)]||0);
+  var estROI=topO>0?topP*topO*TTAX:null;
+  g('roi-grid').innerHTML=
+    '<div class="roi-box"><div class="roi-lbl">単勝回収率（推定）</div>'
+    +'<div class="roi-val" style="color:'+(estROI?estROI>=1?'#00cc66':'#ff3355':'#556a88')+'">'+(estROI?Math.round(estROI*100)+'%':'未確定')+'</div>'
+    +'<div class="roi-sub">'+(topO?topO.toFixed(1)+'倍×'+sorted[0].boat.boat+'号':'オッズ待ち')+'</div></div>'
+    +'<div class="roi-box"><div class="roi-lbl">'+vname+'のAI精度</div>'
+    +'<div class="roi-val" style="color:'+(acc>=70?'#00cc66':acc<60?'#ff3355':'#dde8ff')+'">'+acc+'%</div>'
+    +'<div class="roi-sub">'+(acc>=70?'得意な会場':acc<60?'苦手な会場':'標準的')+'</div></div>';
+
+  // 荒れ因子
+  var stArr2=boats.map(function(b){return bi(b.boat).exh_st||b.avg_st||0.17;});
+  var minST2=Math.min.apply(null,stArr2);
+  var b1st2=stArr2[0]||0.17;
+  var b1wr2=boats[0]?boats[0].national_win||5:5;
+  var rmx2=Math.max.apply(null,boats.slice(1).map(function(b){return b.national_win||5;}));
+  var up2=Math.min(1,Math.max(0,b1st2-minST2)/.3*.5+Math.max(0,rmx2-b1wr2)/3*.5);
+  var factors=[];
+  if(up2>=.25){
+    boats.forEach(function(b,i){
+      if(b.boat===1)return;
+      var st=stArr2[i],wr=b.national_win||5;
+      if(b.boat===2&&st<b1st2)
+        factors.push({boat:b.boat,name:b.name,wr:wr,role:'差し軸',why:'2コースST.'+String(Math.round(st*100)).padStart(2,'0')+'（1号艇より速い）。差しが有力。'});
+      if([3,4].indexOf(b.boat)>=0&&st<=minST2+.02&&wr>=5)
+        factors.push({boat:b.boat,name:b.name,wr:wr,role:'まくり軸',why:b.boat+'コースST最速クラス。まくりが有効な展開。'});
+      else if([3,4,5].indexOf(b.boat)>=0&&wr>=5.5&&!factors.find(function(f){return f.boat===b.boat;}))
+        factors.push({boat:b.boat,name:b.name,wr:wr,role:'まくり差し',why:b.boat+'コース・勝率'+wr.toFixed(2)+'。内の隙間を突くまくり差しに注意。'});
+    });
+  }
+  if(factors.length>0){
+    g('factor-card').style.display='block';
+    g('factor-area').innerHTML=factors.map(function(f){
+      return '<div class="factor">'
+        +'<div style="width:28px;height:28px;border-radius:50%;background:'+BG[f.boat-1]+';color:'+BT[f.boat-1]+';display:flex;align-items:center;justify-content:center;font-weight:900;font-size:12px;flex-shrink:0">'+f.boat+'</div>'
+        +'<div style="flex:1"><div style="font-size:12px;font-weight:700">'+f.name+' <span style="font-size:10px;color:#8899aa;font-weight:400">勝率'+f.wr.toFixed(2)+'</span></div>'
+        +'<div style="font-size:11px;color:#8899aa;margin-top:3px;line-height:1.5">'+f.why+'</div></div>'
+        +'<div class="f-role">'+f.role+'</div></div>';
+    }).join('');
+  }else{
+    g('factor-card').style.display='none';
+  }
+
+  show('result-area');
+  g('result-area').scrollIntoView({behavior:'smooth',block:'start'});
+}
+</script>
+</body>
+</html>

@@ -1365,7 +1365,19 @@ async function fetchRaces(venue, date) {
     const r={venue,race_no:raceNos[i],race_name:data.race_name||`${raceNos[i]}R`,
       dl:data.deadline||'—',spread,c1wr:c1.wr,omr:mc_p.wr,
       c1sr:1,c1gr:c1.gn,mc:mc_p.c,mgr:mc_p.gn,ps,ia:IA[venue]||.54,
-      odds_context:Object.keys(oddsData.win||{}).length>0?{win:oddsData.win||{},quinella:oddsData.quinella||{},exacta:oddsData.exacta||{}}:null,
+      odds_context:(()=>{
+      const od = oddsData?.odds || {};
+      const hasOdds =
+        Object.keys(od.tansho||{}).length ||
+        Object.keys(od.rensho_2t||{}).length ||
+        Object.keys(od.rensho_3t||{}).length;
+      return hasOdds ? {
+        win:      od.tansho    || {},
+        place:    od.fukusho   || {},
+        quinella: od.rensho_2t || {},
+        exacta:   od.rensho_3t || {}
+      } : null;
+    })(),
     };
     r.c1wd=r.c1wr-r.omr; r.bbs=calcBBS(r); r.mi=calcMidx(r);
     r.players=r.ps.map(p=>buildPlayer(p,r));

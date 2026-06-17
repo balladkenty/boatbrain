@@ -85,8 +85,47 @@ main{max-width:880px;margin:0 auto;padding:28px 28px 80px;}
 .bc{font-family:Menlo,Monaco,monospace;font-size:12px;font-weight:700;}
 .bn{font-size:9px;color:var(--light);margin-left:auto;}
 
-.r-foot{border-top:1px solid var(--rule);padding:7px 16px;display:flex;justify-content:flex-end;gap:5px;font-size:11px;color:var(--light);cursor:pointer;}
+.r-foot{border-top:1px solid var(--rule);padding:7px 16px;display:flex;justify-content:space-between;align-items:center;gap:5px;font-size:11px;color:var(--light);}
 .r-foot:hover{color:var(--mid);}
+.r-foot-right{display:flex;align-items:center;gap:12px;}
+.journal-btn{font-size:11px;color:var(--mid);cursor:pointer;padding:3px 8px;border:1px solid var(--rule);border-radius:3px;background:transparent;font-family:inherit;transition:all .15s;}
+.journal-btn:hover{color:var(--text);border-color:var(--mid);}
+
+/* ── ジャーナルパネル ── */
+.journal-panel{display:none;position:fixed;inset:0;z-index:300;background:rgba(14,24,36,.6);align-items:flex-end;justify-content:center;}
+.journal-panel.on{display:flex;}
+.journal-box{background:var(--paper);width:min(560px,100vw);border-radius:14px 14px 0 0;padding:24px 24px 32px;border-top:3px solid var(--vermil);}
+.jb-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+.jb-title{font-size:15px;font-weight:700;color:var(--navy);}
+.jb-close{background:none;border:none;font-size:18px;color:var(--light);cursor:pointer;padding:4px;}
+.jb-race{font-size:11px;color:var(--mid);margin-top:2px;}
+.jb-rows{display:flex;flex-direction:column;gap:14px;margin-bottom:20px;}
+.jb-row{display:flex;align-items:flex-start;gap:12px;}
+.jb-num{font-size:11px;color:var(--light);width:14px;flex-shrink:0;padding-top:8px;}
+.jb-label{font-size:11px;color:var(--mid);width:80px;flex-shrink:0;padding-top:8px;}
+.jb-val{flex:1;}
+.jb-auto{font-size:13px;font-weight:600;color:var(--text);padding:7px 0;}
+/* 結果入力 */
+.jb-result-grid{display:flex;gap:6px;flex-wrap:wrap;}
+.jb-r-btn{padding:5px 10px;border:1px solid var(--rule);border-radius:3px;background:white;font-size:12px;font-family:inherit;cursor:pointer;transition:all .15s;}
+.jb-r-btn.on{background:var(--navy);color:var(--paper);border-color:var(--navy);}
+/* 星評価 */
+.jb-stars{display:flex;gap:6px;}
+.jb-star{font-size:22px;cursor:pointer;opacity:.3;transition:opacity .15s;}
+.jb-star.on{opacity:1;}
+/* メモ */
+.jb-memo{width:100%;border:1px solid var(--rule);border-radius:4px;padding:8px 10px;font-size:13px;font-family:inherit;resize:none;background:white;color:var(--text);outline:none;}
+.jb-memo:focus{border-color:var(--navy);}
+/* YES/NO */
+.jb-yn{display:flex;gap:8px;}
+.jb-yn-btn{flex:1;padding:8px;border:1px solid var(--rule);border-radius:4px;background:white;font-size:13px;font-family:inherit;cursor:pointer;transition:all .15s;text-align:center;}
+.jb-yn-btn.on{background:var(--navy);color:var(--paper);border-color:var(--navy);}
+/* CSV出力 */
+.jb-csv-wrap{background:var(--ivory);border:1px solid var(--rule);border-radius:4px;padding:10px 12px;font-family:Menlo,Monaco,monospace;font-size:11px;color:var(--mid);word-break:break-all;margin-bottom:12px;display:none;}
+.jb-csv-wrap.on{display:block;}
+.jb-copy-btn{width:100%;padding:10px;background:var(--navy);color:var(--paper);border:none;border-radius:4px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;letter-spacing:.04em;}
+.jb-copy-btn:hover{background:var(--navy-lt);}
+.jb-copy-btn.copied{background:#1D6A40;}
 
 /* ─── OVERLAY ─── */
 .ov{display:none;position:fixed;inset:0;z-index:200;background:rgba(14,24,36,.5);}
@@ -217,6 +256,7 @@ main{max-width:880px;margin:0 auto;padding:28px 28px 80px;}
     <span class="logo-tag">競艇を人間として読む</span>
   </div>
   <div class="hdr-date" id="hdate"></div>
+  <button id="log-btn" onclick="openLog()" style="font-size:11px;color:rgba(245,240,232,.6);background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);padding:5px 12px;border-radius:4px;cursor:pointer;font-family:inherit;margin-left:8px;">📚 編集部ログ（0件）</button>
 </header>
 
 <div class="ctrl">
@@ -245,6 +285,83 @@ main{max-width:880px;margin:0 auto;padding:28px 28px 80px;}
 </main>
 
 <div class="ov" id="ov" onclick="closeAll()"></div>
+
+<!-- 編集部ログパネル -->
+<div class="journal-panel" id="log-panel" onclick="closeLog()">
+  <div class="journal-box" style="max-height:80vh;overflow-y:auto" onclick="event.stopPropagation()">
+    <div class="jb-head">
+      <div class="jb-title" id="log-title">📚 編集部ログ</div>
+      <button class="jb-close" onclick="closeLog()">✕</button>
+    </div>
+    <div class="log-list"></div>
+    <div style="margin-top:16px;display:flex;gap:8px;">
+      <button class="jb-copy-btn" onclick="exportCSV()" style="background:var(--j-g);color:var(--ink)">
+        📤 CSVを一括書き出し
+      </button>
+    </div>
+  </div>
+</div>
+<div class="journal-panel" id="jp" onclick="closeJournal(event)">
+  <div class="journal-box" onclick="event.stopPropagation()">
+    <div class="jb-head">
+      <div>
+        <div class="jb-title">📝 今日の一言を残す</div>
+        <div class="jb-race" id="jp-race">—</div>
+      </div>
+      <button class="jb-close" onclick="closeJournal()">✕</button>
+    </div>
+    <div class="jb-rows">
+      <!-- ① 物語（自動入力） -->
+      <div class="jb-row">
+        <span class="jb-num">①</span>
+        <span class="jb-label">AIの物語</span>
+        <div class="jb-val"><div class="jb-auto" id="jp-story">—</div></div>
+      </div>
+      <!-- ② 結果 -->
+      <div class="jb-row">
+        <span class="jb-num">②</span>
+        <span class="jb-label">実際の結果</span>
+        <div class="jb-val">
+          <div class="jb-result-grid" id="jp-results">
+            ${[1,2,3,4,5,6].map(n=>`<button class="jb-r-btn" onclick="selectResult(${n},this)">${n}号艇</button>`).join('')}
+          </div>
+        </div>
+      </div>
+      <!-- ③ 面白さ -->
+      <div class="jb-row">
+        <span class="jb-num">③</span>
+        <span class="jb-label">面白さ</span>
+        <div class="jb-val">
+          <div class="jb-stars" id="jp-stars">
+            ${[1,2,3,4,5].map(n=>`<span class="jb-star" onclick="selectStar(${n})">★</span>`).join('')}
+          </div>
+        </div>
+      </div>
+      <!-- ④ 一言メモ -->
+      <div class="jb-row">
+        <span class="jb-num">④</span>
+        <span class="jb-label">一言メモ</span>
+        <div class="jb-val">
+          <textarea class="jb-memo" id="jp-memo" rows="2" maxlength="50" placeholder="50文字以内で"></textarea>
+        </div>
+      </div>
+      <!-- ⑤ AIなしでも成立した？ -->
+      <div class="jb-row">
+        <span class="jb-num">⑤</span>
+        <span class="jb-label">AIなしでも？</span>
+        <div class="jb-val">
+          <div class="jb-yn">
+            <button class="jb-yn-btn" id="jp-yes" onclick="selectYN('YES')">◯ YES</button>
+            <button class="jb-yn-btn" id="jp-no"  onclick="selectYN('NO')">✕ NO</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- CSV出力 -->
+    <div class="jb-csv-wrap" id="jp-csv"></div>
+    <button class="jb-copy-btn" id="jp-copy" onclick="generateAndCopy()">CSV を生成してコピー</button>
+  </div>
+</div>
 
 <div class="rdw" id="rdw">
   <div class="dw-top">
@@ -797,14 +914,20 @@ function assignCast(r) {
 // ══════════════════════════════════════════════════════
 
 // アバターを描画（course_based / image_url どちらでも対応）
+// 写真読み込み失敗時はコースカラーアバターにフォールバック
 function renderAvatar(player, size=42) {
   const av = player.avatar;
-  if (av.type === 'image_url' && av.url) {
-    return `<img src="${av.url}" style="width:${size}px;height:${size}px;border-radius:50%;object-fit:cover;" alt="${player.name}">`;
-  }
-  // course_based
   const col = COURSE_COLOR[av.course_number] || {a:'#444',b:'#666'};
-  return `<div style="width:${size}px;height:${size}px;border-radius:50%;background:linear-gradient(135deg,${col.a},${col.b});display:flex;align-items:center;justify-content:center;font-family:Menlo,Monaco,monospace;font-size:${Math.round(size*.4)}px;font-weight:700;color:white;">${av.course_number}</div>`;
+  const fallback = `style="width:${size}px;height:${size}px;border-radius:50%;background:linear-gradient(135deg,${col.a},${col.b});display:flex;align-items:center;justify-content:center;font-family:Menlo,Monaco,monospace;font-size:${Math.round(size*.4)}px;font-weight:700;color:white;"`;
+  if (av.type === 'image_url' && av.url) {
+    // onerrorでフォールバック
+    return `<img src="${av.url}"
+      style="width:${size}px;height:${size}px;border-radius:50%;object-fit:cover;"
+      alt="${player.name}"
+      onerror="this.outerHTML='<div ${fallback}>${av.course_number}</div>'"
+    >`;
+  }
+  return `<div ${fallback}>${av.course_number}</div>`;
 }
 
 function renderTagBadge(tagName) {
@@ -896,8 +1019,11 @@ function entryHTML(r, idx) {
         ` : ''}
       </div>`;
     })()}
-    <div class="r-foot" onclick="openRace(${idx})">
-      <span>選手を詳しく読む</span><span>→</span>
+    <div class="r-foot">
+      <button class="journal-btn" onclick="openJournal(${idx},event)">📝 今日の一言を残す</button>
+      <div class="r-foot-right" onclick="openRace(${idx})">
+        <span>選手を詳しく読む</span><span>→</span>
+      </div>
     </div>
   </div>`;
 }
@@ -956,14 +1082,18 @@ function openPlayer(raceIdx, playerId) {
   const entry = cast.find(e => e.player.player_id === playerId);
   const ribbon = entry?.ribbon || '';
 
-  // アバター（大）
+  // アバター（大）— 写真あり/なし両対応、失敗時はコースカラーに自動切替
   const col = COURSE_COLOR[p.avatar.course_number] || {a:'#444',b:'#666'};
   const avEl = document.getElementById('pp-av');
+  const fallbackStyle = `width:108px;height:108px;border-radius:50%;background:linear-gradient(135deg,${col.a},${col.b});display:flex;align-items:center;justify-content:center;font-family:Menlo,Monaco,monospace;font-size:44px;font-weight:700;color:white;border:3px solid rgba(255,255,255,.22);text-shadow:0 2px 8px rgba(0,0,0,.3);position:relative;`;
   if (p.avatar.type === 'image_url' && p.avatar.url) {
     avEl.style.cssText = `width:108px;height:108px;border-radius:50%;border:3px solid rgba(255,255,255,.22);overflow:hidden;position:relative;`;
-    avEl.innerHTML = `<img src="${p.avatar.url}" style="width:100%;height:100%;object-fit:cover;"><div class="pp-role">${ribbon}</div>`;
+    avEl.innerHTML = `<img src="${p.avatar.url}"
+      style="width:100%;height:100%;object-fit:cover;"
+      onerror="this.parentElement.style.cssText='${fallbackStyle}';this.parentElement.innerHTML='${p.course}<div class=\\'pp-role\\'>${ribbon}</div>'"
+    ><div class="pp-role">${ribbon}</div>`;
   } else {
-    avEl.style.cssText = `width:108px;height:108px;border-radius:50%;background:linear-gradient(135deg,${col.a},${col.b});display:flex;align-items:center;justify-content:center;font-family:Menlo,Monaco,monospace;font-size:44px;font-weight:700;color:white;border:3px solid rgba(255,255,255,.22);text-shadow:0 2px 8px rgba(0,0,0,.3);position:relative;`;
+    avEl.style.cssText = fallbackStyle;
     avEl.innerHTML = `${p.course}<div class="pp-role">${ribbon}</div>`;
   }
 
@@ -1032,6 +1162,151 @@ function closePP() {
     document.body.style.overflow = '';
   }
 }
+// ── ジャーナル ──────────────────────────────────────
+let _jState = { raceIdx:null, result:null, stars:0, yn:null };
+
+function openJournal(idx, e) {
+  if(e) e.stopPropagation();
+  const r = window._rd[idx]; if(!r) return;
+  const s = getStory(r);
+  _jState = { raceIdx:idx, result:null, stars:0, yn:null };
+
+  // 初期化
+  document.getElementById('jp-race').textContent = `${r.venue} ${r.race_no}R`;
+  document.getElementById('jp-story').textContent = s ? `${s.g==='monster'?'🔴':s.g==='charge'?'🟠':s.g==='guard'?'🟡':'📘'} ${s.k}` : '—';
+  document.querySelectorAll('.jb-r-btn').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('.jb-star').forEach(b=>b.classList.remove('on'));
+  document.getElementById('jp-yes').classList.remove('on');
+  document.getElementById('jp-no').classList.remove('on');
+  document.getElementById('jp-memo').value='';
+  document.getElementById('jp-csv').classList.remove('on');
+  document.getElementById('jp-csv').textContent='';
+  const copyBtn=document.getElementById('jp-copy');
+  copyBtn.textContent='CSV を生成してコピー';
+  copyBtn.classList.remove('copied');
+
+  document.getElementById('jp').classList.add('on');
+  document.body.style.overflow='hidden';
+}
+
+function closeJournal(e) {
+  if(e && e.target!==document.getElementById('jp')) return;
+  document.getElementById('jp').classList.remove('on');
+  document.body.style.overflow='';
+}
+
+function selectResult(n, btn) {
+  document.querySelectorAll('.jb-r-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  _jState.result = n;
+}
+
+function selectStar(n) {
+  _jState.stars = n;
+  document.querySelectorAll('.jb-star').forEach((s,i)=>{
+    s.classList.toggle('on', i < n);
+  });
+}
+
+function selectYN(val) {
+  _jState.yn = val;
+  document.getElementById('jp-yes').classList.toggle('on', val==='YES');
+  document.getElementById('jp-no').classList.toggle('on',  val==='NO');
+}
+
+function generateAndCopy() {
+  const r = window._rd[_jState.raceIdx];
+  if(!r) return;
+  const s = getStory(r);
+  const story = s ? `${s.g==='monster'?'🔴':s.g==='charge'?'🟠':s.g==='guard'?'🟡':'📘'}${s.k}` : '—';
+  const date  = document.getElementById('date').value || new Date().toISOString().split('T')[0];
+  const race  = `${r.venue}${r.race_no}R`;
+  const result= _jState.result ? `${_jState.result}号艇` : '—';
+  const stars = _jState.stars || '—';
+  const memo  = (document.getElementById('jp-memo').value||'').replace(/"/g,"'");
+  const yn    = _jState.yn || '—';
+
+  const csv = `${date},${race},${story},${result},${stars},"${memo}",${yn}`;
+
+  // ① LocalStorageに保存
+  try {
+    const saved = JSON.parse(localStorage.getItem('boatbrain_journal')||'[]');
+    saved.push({ date, race, story, result, stars, memo, yn, csv, ts: Date.now() });
+    localStorage.setItem('boatbrain_journal', JSON.stringify(saved));
+    updateLogBadge();
+  } catch(e) {}
+
+  // 表示
+  const csvEl = document.getElementById('jp-csv');
+  csvEl.textContent = csv;
+  csvEl.classList.add('on');
+
+  // クリップボードにコピー
+  navigator.clipboard.writeText(csv).then(()=>{
+    const btn=document.getElementById('jp-copy');
+    btn.textContent='✅ 保存＆コピー完了 — スプレッドシートに貼り付けてください';
+    btn.classList.add('copied');
+  }).catch(()=>{
+    document.getElementById('jp-copy').textContent='保存しました。上のCSVを手動でコピーしてください';
+  });
+}
+
+// ── 編集部ログ ──────────────────────────────────────
+function updateLogBadge() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('boatbrain_journal')||'[]');
+    const btn = document.getElementById('log-btn');
+    if(btn) btn.textContent = `📚 編集部ログ（${saved.length}件）`;
+  } catch(e) {}
+}
+
+function openLog() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('boatbrain_journal')||'[]');
+    const panel = document.getElementById('log-panel');
+
+    if(saved.length === 0) {
+      panel.querySelector('.log-list').innerHTML =
+        '<div style="text-align:center;padding:40px;color:var(--light)">まだ記録がありません</div>';
+    } else {
+      const rows = [...saved].reverse().slice(0,30).map(e => `
+        <div style="padding:10px 0;border-bottom:1px solid var(--rule);display:grid;grid-template-columns:90px 80px 1fr 40px 36px;gap:6px;align-items:center;font-size:12px;">
+          <span style="color:var(--mid);font-family:Menlo,Monaco,monospace">${e.date}</span>
+          <span style="font-weight:600">${e.race}</span>
+          <span>${e.story}</span>
+          <span style="color:var(--gold)">${typeof e.stars==='number'?'★'.repeat(e.stars):e.stars}</span>
+          <span style="color:${e.yn==='YES'?'#1D6A40':'var(--vermil)'}; font-size:10px;font-weight:700">${e.yn}</span>
+        </div>
+      `).join('');
+      panel.querySelector('.log-list').innerHTML = rows;
+    }
+
+    panel.classList.add('on');
+    document.body.style.overflow = 'hidden';
+  } catch(e) {}
+}
+
+function closeLog() {
+  document.getElementById('log-panel').classList.remove('on');
+  document.body.style.overflow = '';
+}
+
+function exportCSV() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('boatbrain_journal')||'[]');
+    if(saved.length === 0) { alert('記録がありません'); return; }
+    const header = '日付,レース,物語,結果,面白さ,メモ,AIなしでも成立';
+    const body = saved.map(e => e.csv).join('\n');
+    const blob = new Blob([header+'\n'+body], {type:'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `boatbrain_journal_${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  } catch(e) { alert('書き出しに失敗しました'); }
+}
+
 function closeAll() {
   ['rdw','pp','ov'].forEach(id => document.getElementById(id).classList.remove('on'));
   document.body.style.overflow = '';
@@ -1048,21 +1323,84 @@ document.getElementById('hdate').textContent =
   new Date().toLocaleDateString('ja-JP',{year:'numeric',month:'long',day:'numeric',weekday:'short'});
 document.getElementById('date').value = new Date().toISOString().split('T')[0];
 window._rd = [];
+updateLogBadge();
+
+// ── 会場コード ──
+const VENUE_CODE={"桐生":1,"戸田":2,"江戸川":3,"平和島":4,"多摩川":5,"浜名湖":6,"蒲郡":7,"常滑":8,"津":9,"三国":10,"びわこ":11,"住之江":12,"尼崎":13,"鳴門":14,"丸亀":15,"児島":16,"宮島":17,"徳山":18,"下関":19,"若松":20,"芦屋":21,"福岡":22,"唐津":23,"大村":24};
+const API='https://boatbrain.onrender.com';
+
+async function fetchRaces(venue, date) {
+  const jcd=VENUE_CODE[venue]; if(!jcd)return null;
+  const dateStr=date.replace(/-/g,'');
+  const raceNos=[1,2,3,4,5,6,7,8,9,10,11,12];
+
+  const [listResults, oddsResults] = await Promise.all([
+    Promise.allSettled(raceNos.map(rno=>fetch(`${API}/api/racelist?jcd=${jcd}&rno=${rno}&date=${dateStr}`).then(r=>r.json()))),
+    Promise.allSettled(raceNos.map(rno=>fetch(`${API}/api/odds?jcd=${jcd}&rno=${rno}&date=${dateStr}`).then(r=>r.json()))),
+  ]);
+
+  const races=[];
+  for(let i=0;i<raceNos.length;i++){
+    if(listResults[i].status!=='fulfilled')continue;
+    const data=listResults[i].value;
+    const boats=data.boats||[];
+    if(boats.length===0)continue;
+
+    const oddsData=oddsResults[i].status==='fulfilled'?oddsResults[i].value:{};
+    const ps=boats.map(b=>({
+      c:b.boat, n:b.name||`${b.boat}号艇`, g:b.grade||'—',
+      gn:b.grade==='A1'?4:b.grade==='A2'?3:b.grade==='B1'?2:1,
+      wr:b.national_win||0, avg_st:b.avg_st||null,
+      place_rate:b.national_3con||null, mr:b.motor_2con||0,
+      photo_url: b.reg_no ? `https://boatrace.jp/racerphoto/${b.reg_no}.jpg` : null,
+    }));
+
+    const c1=ps.find(p=>p.c===1)||{wr:0,gn:2};
+    const outer=ps.filter(p=>p.c>1).sort((a,b)=>b.wr-a.wr);
+    const mc_p=outer[0]||{c:5,wr:0,gn:2};
+    const wrs=ps.map(p=>p.wr);
+    const avg=wrs.reduce((s,v)=>s+v,0)/wrs.length;
+    const spread=Math.round(Math.sqrt(wrs.reduce((s,v)=>s+(v-avg)**2,0)/wrs.length)*3);
+
+    const r={venue,race_no:raceNos[i],race_name:data.race_name||`${raceNos[i]}R`,
+      dl:data.deadline||'—',spread,c1wr:c1.wr,omr:mc_p.wr,
+      c1sr:1,c1gr:c1.gn,mc:mc_p.c,mgr:mc_p.gn,ps,ia:IA[venue]||.54,
+      odds_context:Object.keys(oddsData.win||{}).length>0?{win:oddsData.win||{},quinella:oddsData.quinella||{},exacta:oddsData.exacta||{}}:null,
+    };
+    r.c1wd=r.c1wr-r.omr; r.bbs=calcBBS(r); r.mi=calcMidx(r);
+    r.players=r.ps.map(p=>buildPlayer(p,r));
+    races.push(r);
+  }
+  return races.length>0?races:null;
+}
 
 function loadRaces() {
-  const v = document.getElementById('venue').value;
-  if (!v) { alert('会場を選択してください'); return; }
-  document.getElementById('main').innerHTML = '<div class="loading"><div class="spin"></div>読んでいます…</div>';
-  document.getElementById('fbar').style.display = 'none';
-  setTimeout(() => {
-    const order = {monster:0,charge:1,guard:2,textbook:3};
-    window._rd = demoRaces(v).sort((a,b) => {
+  const v=document.getElementById('venue').value;
+  const d=document.getElementById('date').value;
+  if(!v){alert('会場を選択してください');return;}
+  document.getElementById('main').innerHTML='<div class="loading"><div class="spin"></div>読んでいます…</div>';
+  document.getElementById('fbar').style.display='none';
+
+  fetchRaces(v,d).then(apiRaces=>{
+    const order={monster:0,charge:1,guard:2,textbook:3};
+    const races=apiRaces||demoRaces(v);
+    const label=apiRaces?'実データ':'デモデータ';
+    window._rd=races.sort((a,b)=>{
       const sa=getStory(a),sb=getStory(b);
-      return (order[sa?.g]??9)-(order[sb?.g]??9)||b.bbs-a.bbs;
+      return(order[sa?.g]??9)-(order[sb?.g]??9)||b.bbs-a.bbs;
     });
-    document.getElementById('main').innerHTML = window._rd.map((r,i) => entryHTML(r,i)).join('');
-    document.getElementById('fbar').style.display = 'flex';
-  }, 400);
+    document.getElementById('main').innerHTML=
+      `<div style="font-size:10px;color:var(--light);padding:6px 0 10px;letter-spacing:.06em">${label} — ${races.length}レース</div>`+
+      window._rd.map((r,i)=>entryHTML(r,i)).join('');
+    document.getElementById('fbar').style.display='flex';
+  }).catch(()=>{
+    const races=demoRaces(v);
+    window._rd=races;
+    document.getElementById('main').innerHTML=
+      `<div style="font-size:10px;color:var(--light);padding:6px 0 10px">デモデータ — ${races.length}レース</div>`+
+      races.map((r,i)=>entryHTML(r,i)).join('');
+    document.getElementById('fbar').style.display='flex';
+  });
 }
 </script>
 </body>

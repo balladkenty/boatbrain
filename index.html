@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>BOAT BRAIN</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700;900&family=Noto+Sans+JP:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap');
 :root{
   --paper:#F5F0E8;--ivory:#EDE8DC;--cream:#E4DDD0;
   --navy:#1B2B4B;--navy-lt:#2D4270;
@@ -14,11 +13,11 @@
   --j-t:#2355A0;--j-g:#8B6800;--j-c:#C94C1A;--j-m:#6B1E8A;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-body{background:var(--paper);color:var(--text);font-family:'Noto Sans JP',sans-serif;font-size:14px;line-height:1.6;min-height:100vh;}
+body{background:var(--paper);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;font-size:14px;line-height:1.6;min-height:100vh;}
 
 /* HEADER */
 .hdr{background:var(--navy);height:52px;padding:0 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
-.logo{font-family:'Noto Serif JP',serif;font-size:18px;font-weight:900;color:var(--paper);letter-spacing:.1em;}
+.logo{font-family:Georgia,serif;font-size:18px;font-weight:900;color:var(--paper);letter-spacing:.1em;}
 .logo em{color:var(--gold-lt);font-style:normal;}
 .logo-tag{font-size:9px;color:rgba(245,240,232,.4);letter-spacing:.16em;text-transform:uppercase;margin-left:12px;}
 .hdr-date{font-size:11px;color:rgba(245,240,232,.4);}
@@ -51,9 +50,9 @@ main{max-width:880px;margin:0 auto;padding:28px 28px 80px;}
 .entry-grid{display:grid;grid-template-columns:80px 1fr auto;align-items:stretch;min-height:88px;}
 
 .r-num-col{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 10px;background:var(--ivory);border-right:1px solid var(--rule);}
-.r-num{font-family:'Space Mono',monospace;font-size:26px;font-weight:700;color:var(--navy);line-height:1;}
+.r-num{font-family:Menlo,Monaco,monospace;font-size:26px;font-weight:700;color:var(--navy);line-height:1;}
 .r-label{font-size:9px;color:var(--light);letter-spacing:.08em;margin-top:3px;}
-.r-time{font-family:'Space Mono',monospace;font-size:10px;color:var(--mid);margin-top:5px;}
+.r-time{font-family:Menlo,Monaco,monospace;font-size:10px;color:var(--mid);margin-top:5px;}
 
 .r-body{padding:13px 16px;}
 .r-kind-row{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
@@ -72,7 +71,7 @@ main{max-width:880px;margin:0 auto;padding:28px 28px 80px;}
 .p-chip.pro{border-color:rgba(201,76,26,.3);background:rgba(201,76,26,.05);}
 .p-chip.ant{border-color:rgba(139,104,0,.25);background:rgba(139,104,0,.04);}
 .p-chip.drk{border-color:rgba(107,30,138,.28);background:rgba(107,30,138,.04);}
-.pc-num{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;width:16px;text-align:center;}
+.pc-num{font-family:Menlo,Monaco,monospace;font-size:13px;font-weight:700;width:16px;text-align:center;}
 .pc-name{font-weight:600;}
 .pc-grade{font-size:10px;padding:1px 5px;border-radius:2px;background:rgba(0,0,0,.06);}
 .g-a1{color:#8B6800;}.g-a2{color:#2355A0;}.g-b{color:var(--light);}
@@ -83,7 +82,7 @@ main{max-width:880px;margin:0 auto;padding:28px 28px 80px;}
 .bet-row{display:flex;align-items:center;gap:7px;}
 .bm{font-size:12px;font-weight:700;width:14px;flex-shrink:0;}
 .bm.h{color:var(--vermil);}.bm.t{color:var(--gold);}.bm.s{color:var(--navy-lt);}
-.bc{font-family:'Space Mono',monospace;font-size:12px;font-weight:700;}
+.bc{font-family:Menlo,Monaco,monospace;font-size:12px;font-weight:700;}
 .bn{font-size:9px;color:var(--light);margin-left:auto;}
 
 .r-foot{border-top:1px solid var(--rule);padding:7px 16px;display:flex;justify-content:flex-end;gap:5px;font-size:11px;color:var(--light);cursor:pointer;}
@@ -99,7 +98,7 @@ main{max-width:880px;margin:0 auto;padding:28px 28px 80px;}
 .dw-top{position:sticky;top:0;z-index:10;background:var(--navy);padding:14px 18px;display:flex;align-items:center;gap:12px;}
 .dw-close{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.12);border:none;color:var(--paper);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
 .dw-close:hover{background:rgba(255,255,255,.22);}
-.dw-h{font-family:'Noto Serif JP',serif;font-size:15px;font-weight:700;color:var(--paper);flex:1;}
+.dw-h{font-family:Georgia,serif;font-size:15px;font-weight:700;color:var(--paper);flex:1;}
 .dw-tag{font-size:10px;font-weight:700;padding:3px 9px;border-radius:2px;letter-spacing:.08em;text-transform:uppercase;}
 .dt-t{background:rgba(35,85,160,.35);color:#99c0ff;}
 .dt-g{background:rgba(184,144,58,.3);color:#f0c85a;}
@@ -116,9 +115,9 @@ main{max-width:880px;margin:0 auto;padding:28px 28px 80px;}
 .cast-row.pro{border-left-color:var(--j-c);}
 .cast-row.ant{border-left-color:var(--j-g);}
 .cast-row.drk{border-left-color:var(--j-m);}
-.cr-av{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:17px;font-weight:700;color:white;flex-shrink:0;}
+.cr-av{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:Menlo,Monaco,monospace;font-size:17px;font-weight:700;color:white;flex-shrink:0;}
 .cr-info{flex:1;}
-.cr-name{font-family:'Noto Serif JP',serif;font-size:16px;font-weight:700;}
+.cr-name{font-family:Georgia,serif;font-size:16px;font-weight:700;}
 .cr-meta{display:flex;align-items:center;gap:7px;margin-top:3px;}
 .cr-c{font-size:11px;color:var(--light);}
 .cr-gr{font-size:10px;font-weight:700;padding:1px 6px;border-radius:2px;background:var(--ivory);}
@@ -132,7 +131,7 @@ main{max-width:880px;margin:0 auto;padding:28px 28px 80px;}
 .bet-item{display:flex;align-items:center;gap:14px;padding:10px 14px;background:white;border:1px solid var(--rule);}
 .db-m{font-size:14px;font-weight:700;width:16px;flex-shrink:0;}
 .db-m.h{color:var(--vermil);}.db-m.t{color:var(--gold);}.db-m.s{color:var(--navy-lt);}
-.db-c{font-family:'Space Mono',monospace;font-size:18px;font-weight:700;flex:1;}
+.db-c{font-family:Menlo,Monaco,monospace;font-size:18px;font-weight:700;flex:1;}
 .db-n{font-size:11px;color:var(--light);}
 
 /* ─── PLAYER PANEL ─── */
@@ -144,13 +143,13 @@ main{max-width:880px;margin:0 auto;padding:28px 28px 80px;}
 .pp-close{position:absolute;top:12px;right:14px;width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.12);border:none;color:var(--paper);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
 .pp-close:hover{background:rgba(255,255,255,.22);}
 .pp-av-wrap{display:flex;justify-content:center;padding:28px 20px 0;}
-.pp-av{width:108px;height:108px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:44px;font-weight:700;color:white;border:3px solid rgba(255,255,255,.22);text-shadow:0 2px 8px rgba(0,0,0,.3);position:relative;overflow:visible;}
+.pp-av{width:108px;height:108px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:Menlo,Monaco,monospace;font-size:44px;font-weight:700;color:white;border:3px solid rgba(255,255,255,.22);text-shadow:0 2px 8px rgba(0,0,0,.3);position:relative;overflow:visible;}
 .pp-av img{width:100%;height:100%;border-radius:50%;object-fit:cover;position:absolute;inset:0;}
 .pp-role{position:absolute;bottom:2px;right:2px;width:28px;height:28px;background:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;}
 .pp-name-blk{padding:14px 20px 18px;text-align:center;}
-.pp-name{font-family:'Noto Serif JP',serif;font-size:24px;font-weight:900;color:var(--paper);letter-spacing:.06em;}
+.pp-name{font-family:Georgia,serif;font-size:24px;font-weight:900;color:var(--paper);letter-spacing:.06em;}
 .pp-sub{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:6px;}
-.pp-course{font-family:'Space Mono',monospace;font-size:13px;color:rgba(255,255,255,.55);}
+.pp-course{font-family:Menlo,Monaco,monospace;font-size:13px;color:rgba(255,255,255,.55);}
 .pp-grade{font-size:11px;font-weight:700;padding:2px 8px;border-radius:3px;background:rgba(255,255,255,.12);color:rgba(255,255,255,.8);}
 .pp-grade.a1{background:rgba(184,144,58,.4);color:var(--gold-lt);}
 .pp-grade.a2{background:rgba(61,142,245,.3);color:#99c0ff;}
@@ -182,7 +181,7 @@ main{max-width:880px;margin:0 auto;padding:28px 28px 80px;}
 .pf-stab  {background:#1D6A40;}
 .pf-atk   {background:var(--j-c);}
 .pf-gap   {background:var(--j-m);}
-.p-val{font-family:'Space Mono',monospace;font-size:11px;color:var(--light);width:28px;text-align:right;flex-shrink:0;}
+.p-val{font-family:Menlo,Monaco,monospace;font-size:11px;color:var(--light);width:28px;text-align:right;flex-shrink:0;}
 
 /* モーター */
 .motor-card{display:flex;align-items:center;gap:14px;padding:14px 16px;background:white;border:1px solid var(--rule);margin-bottom:24px;}
@@ -408,8 +407,14 @@ function calcPortfolio(r) {
   }
 
 // ── ROMAN BET（確定定義）────────────────────────────
-//
-//  ROMAN = 物語タグ（外の怪物/主役交代）と市場人気の方向が逆
+  // 必要な変数を先に定義
+  const story_points_outside = (genre === 'monster' || genre === 'charge');
+  const market_c1_prob = 1 / (parseFloat(win["1"]) || 99);
+  const market_favors_inside = market_c1_prob > 0.35;
+  const roman_target_c = String(r.mc);
+  const roman_ms = win_scores[roman_target_c] || 0;
+
+
 //          かつ misprice_score > 0.08
 //          かつ 構造的に説明できる（理由が1行）
 //
@@ -799,7 +804,7 @@ function renderAvatar(player, size=42) {
   }
   // course_based
   const col = COURSE_COLOR[av.course_number] || {a:'#444',b:'#666'};
-  return `<div style="width:${size}px;height:${size}px;border-radius:50%;background:linear-gradient(135deg,${col.a},${col.b});display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:${Math.round(size*.4)}px;font-weight:700;color:white;">${av.course_number}</div>`;
+  return `<div style="width:${size}px;height:${size}px;border-radius:50%;background:linear-gradient(135deg,${col.a},${col.b});display:flex;align-items:center;justify-content:center;font-family:Menlo,Monaco,monospace;font-size:${Math.round(size*.4)}px;font-weight:700;color:white;">${av.course_number}</div>`;
 }
 
 function renderTagBadge(tagName) {
@@ -857,7 +862,7 @@ function entryHTML(r, idx) {
       // ★の意味を「確率」から切り離す文脈ラベル（1箇所だけ）
       // 「異常の深さ」という言葉でユーザーの認知をリセットする
       const roman_label_prefix = pf.has_edge
-        ? `<span style="font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.1em;color:var(--light)">異常の深さ</span> `
+        ? `<span style="font-family:Menlo,Monaco,monospace;font-size:9px;letter-spacing:.1em;color:var(--light)">異常の深さ</span> `
         : '';
 
       // ROMANなし日のUX:
@@ -872,15 +877,15 @@ function entryHTML(r, idx) {
 
       return `<div style="border-top:1px solid var(--rule);background:${block_bg};padding:10px 16px;">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-          <span style="font-family:'Space Mono',monospace;font-size:9px;font-weight:700;letter-spacing:.12em;color:var(--light)">MARKET VIEW</span>
+          <span style="font-family:Menlo,Monaco,monospace;font-size:9px;font-weight:700;letter-spacing:.12em;color:var(--light)">MARKET VIEW</span>
           <span style="font-size:10px;font-weight:700;color:${mv_color}">${pf.market_view}</span>
         </div>
         <div style="display:grid;grid-template-columns:44px 1fr;gap:3px 10px;font-size:12px;margin-bottom:${pf.has_edge?'8px':'0'};">
-          <span style="font-family:'Space Mono',monospace;font-size:10px;font-weight:700;color:var(--navy-lt)">CORE</span>
+          <span style="font-family:Menlo,Monaco,monospace;font-size:10px;font-weight:700;color:var(--navy-lt)">CORE</span>
           <span style="color:var(--text)">${pf.core.note}</span>
-          <span style="font-family:'Space Mono',monospace;font-size:10px;font-weight:700;color:var(--mid)">HEDGE</span>
+          <span style="font-family:Menlo,Monaco,monospace;font-size:10px;font-weight:700;color:var(--mid)">HEDGE</span>
           <span style="color:var(--text)">${pf.hedge.note}</span>
-          <span style="font-family:'Space Mono',monospace;font-size:10px;font-weight:700;color:${pf.has_edge?'var(--j-c)':'var(--light)'}">ROMAN</span>
+          <span style="font-family:Menlo,Monaco,monospace;font-size:10px;font-weight:700;color:${pf.has_edge?'var(--j-c)':'var(--light)'}">ROMAN</span>
           ${roman_display}
         </div>
         ${pf.has_edge ? `
@@ -958,7 +963,7 @@ function openPlayer(raceIdx, playerId) {
     avEl.style.cssText = `width:108px;height:108px;border-radius:50%;border:3px solid rgba(255,255,255,.22);overflow:hidden;position:relative;`;
     avEl.innerHTML = `<img src="${p.avatar.url}" style="width:100%;height:100%;object-fit:cover;"><div class="pp-role">${ribbon}</div>`;
   } else {
-    avEl.style.cssText = `width:108px;height:108px;border-radius:50%;background:linear-gradient(135deg,${col.a},${col.b});display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:44px;font-weight:700;color:white;border:3px solid rgba(255,255,255,.22);text-shadow:0 2px 8px rgba(0,0,0,.3);position:relative;`;
+    avEl.style.cssText = `width:108px;height:108px;border-radius:50%;background:linear-gradient(135deg,${col.a},${col.b});display:flex;align-items:center;justify-content:center;font-family:Menlo,Monaco,monospace;font-size:44px;font-weight:700;color:white;border:3px solid rgba(255,255,255,.22);text-shadow:0 2px 8px rgba(0,0,0,.3);position:relative;`;
     avEl.innerHTML = `${p.course}<div class="pp-role">${ribbon}</div>`;
   }
 

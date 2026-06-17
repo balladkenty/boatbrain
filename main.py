@@ -86,14 +86,29 @@ def api_racelist(jcd: int, rno: int, date: str = None):
     except Exception as e:
         raise HTTPException(500, str(e))
 
+def json_safe(obj):
+    if isinstance(obj, dict):
+        return {
+            "-".join(map(str, k)) if isinstance(k, tuple) else str(k): json_safe(v)
+            for k, v in obj.items()
+        }
+    if isinstance(obj, list):
+        return [json_safe(v) for v in obj]
+    return obj
+
 @app.get("/api/odds")
 def api_odds(jcd: int, rno: int, date: str = None):
     hd = date or today()
     try:
         odds = fetch_odds(jcd, rno, hd)
+        safe_odds = json_safe(odds)
         result = {"venue": CODE_VENUE.get(jcd), "jcd": jcd,
-                  "race_no": rno, "date": hd, "odds": odds}
-        if any(v and float(v) > 0 for v in odds.get("tansho", {}).values()):
+                  "race_no": rno, "date": hd, "odds": safe_odds}
+        if any(
+            float(v) > 0
+            for v in safe_odds.get("tansho", {}).values()
+            if v is not None
+        ):
             save(result, "odds", jcd, rno, hd)
         return result
     except Exception as e:

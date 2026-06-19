@@ -255,94 +255,36 @@ def fetch_beforeinfo(jcd: int, race_no: int, date_str: str = None) -> dict:
     if "データがありません" in html:
         return {}
 
-    result = {}
+    result = {b: {"exh_st": None, "exh_st_f": False, "exh_time": None} for b in range(1, 7)}
 
-    # 展示タイムテーブル（boat_sectionsで枠番ごとに分割）
-    boat_sections = re.split(r'<td class="is-boatColor(\d+)', html)
+    # 展示タイム: 枠番ヘッダ(is-boatColorN)の直後に現れる最初の 6.xx / 7.xx
+    for m in re.finditer(r'is-boatColor(\d)[^>]*>\s*\d+\s*</td>.*?([67]\.\d{2})', html, re.S):
+        boat = int(m.group(1))
+        if boat in result and result[boat]["exh_time"] is None:
+            result[boat]["exh_time"] = float(m.group(2))
 
-    for i in range(1, len(boat_sections), 2):
-        try:
-            boat_no = int(boat_sections[i])
-            section = boat_sections[i+1] if i+1 < len(boat_sections) else ""
-
-            # 展示タイム: 6.xx または 7.xx
-            time_m = re.search(r'(6\.\d{2}|7\.\d{2})', section[:800])
-            exh_time = float(time_m.group(1)) if time_m else None
-
-            # F表示確認
-            is_f = bool(re.search(r'F\.', section[:400]))
-
-            result[boat_no] = {
-                "exh_st":   None,  # 後で展示STテーブルから取得
-                "exh_st_f": is_f,
-                "exh_time": exh_time,
-            }
-        except (IndexError, ValueError):
+    # スタート展示ST + 展示フライング:
+    #   <span class="table1_boatImage1Number is-typeN">N</span> ... (枠番)
+    #   <span class="table1_boatImage1Time[ is-fBold is-fColorN]">.16 / F.05</span> (ST / F)
+    st_re = re.compile(
+        r'table1_boatImage1Number[^>]*>(\d)<.*?'
+        r'table1_boatImage1Time([^>]*)>([^<]+)<',
+        re.S,
+    )
+    for m in st_re.finditer(html):
+        boat = int(m.group(1))
+        cls  = m.group(2)
+        raw  = m.group(3).strip()
+        if not (1 <= boat <= 6):
             continue
-
-    # 展示STテーブルを別途パース
-    # 構造: <td>ST</td><td>.09</td> のパターン
-    st_matches = re.findall(r'<td>ST</td>\s*<td>([\d.]+)</td>', html)
-    course_matches = re.findall(r'<td>進入</td>\s*<td>(\d)</td>', html)
-
-    # コースとSTを対応させて枠番に紐付け
-    if st_matches and course_matches:
-        for course_str, st_str in zip(course_matches, st_matches):
-            course = int(course_str)
-            st_val_str = st_str if st_str.startswith('0') else '0' + st_str
-            try:
-                st_val = float(st_val_str)
-                # 進入コースから枠番を探す
-                for boat_no, info in result.items():
-                    if info.get('_course') == course:
-                        result[boat_no]['exh_st'] = st_val
-                        break
-            except ValueError:
-                continue
-
-    # より確実な方法: 全ての数値シーケンスからパース
-    # パターン: [枠番, 展示T, ..., 展示T, 進入コース, 着順, 0.0, ST]
-    all_nums = re.findall(r'<td[^>]*>([\d.]+)</td>', html)
-    
-    # シーケンスを解析
-    i = 0
-    boat_data = {}
-    while i < len(all_nums):
-        # 枠番(1-6)で始まるパターンを探す
-        try:
-            v = all_nums[i]
-            if v in ['1','2','3','4','5','6'] and i+8 < len(all_nums):
-                boat = int(v)
-                # 次が展示タイム(6.xx)かチェック
-                if all_nums[i+1].startswith('6.') or all_nums[i+1].startswith('7.'):
-                    exh_t = float(all_nums[i+1])
-                    # ST値を探す（.09, .12形式）
-                    for j in range(i+2, min(i+12, len(all_nums))):
-                        sv = all_nums[j]
-                        if sv.startswith('.') or (sv.startswith('0.') and float(sv) < 0.4):
-                            try:
-                                st_v = float(sv if sv.startswith('0') else '0'+sv)
-                                if 0.0 < st_v < 0.4:
-                                    if boat not in boat_data:
-                                        boat_data[boat] = {}
-                                    boat_data[boat]['exh_time'] = exh_t
-                                    boat_data[boat]['exh_st'] = st_v
-                                    break
-                            except: pass
-                    i += 8
-                    continue
-        except (ValueError, IndexError):
-            pass
-        i += 1
-
-    # boat_dataで result を更新
-    for boat, data in boat_data.items():
+        is_f = ("F" in raw) or ("is-fColor" in cls)
+        num = raw.replace("F", "")
+        if num.startswith("."):
+            num = "0" + num
+        val = _safe_float(num)
         if boat in result:
-            result[boat].update(data)
-        else:
-            result[boat] = {'exh_st': data.get('exh_st'), 
-                           'exh_time': data.get('exh_time'),
-                           'exh_st_f': False}
+            result[boat]["exh_st"]   = val
+            result[boat]["exh_st_f"] = is_f
 
     return result
 

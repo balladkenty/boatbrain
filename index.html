@@ -1304,7 +1304,7 @@ async function fetchRaces(venue, date) {
       } : null;
     })(),
     };
-    r.c1wd=r.c1wr-r.omr; r.bbs=calcBBS(r); r.mi=calcMidx(r);
+    r.c1wd=r.c1wr-r.omr; r.bbs=_bbs(r); r.mi=_midx(r);
     r.players=r.ps.map(p=>buildPlayer(p,r));
     races.push(r);
   }

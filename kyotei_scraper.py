@@ -321,7 +321,9 @@ def fetch_odds(jcd: int, race_no: int, date_str: str = None) -> dict:
     try:
         html2 = _get("odds2tf", params)
         vals2 = re.findall(r'<td class="oddsPoint [^"]*">([\d.]+)</td>', html2)
-        combos2 = [(i,j) for i in range(1,7) for j in range(1,7) if i!=j]
+        # 公式ページは「列=1着 × 行=2着」グリッド。文書順は行ごとに1着が先に変わる
+        combos2 = [(first, [x for x in range(1,7) if x!=first][r])
+                   for r in range(5) for first in range(1,7)]
         for k,(i,j) in enumerate(combos2):
             if k < len(vals2):
                 try: out["rensho_2t"][(i,j)] = float(vals2[k])
@@ -333,8 +335,12 @@ def fetch_odds(jcd: int, race_no: int, date_str: str = None) -> dict:
     try:
         html3 = _get("odds3t", params)
         vals3 = re.findall(r'<td class="oddsPoint [^"]*">([\d.]+)</td>', html3)
-        combos3 = [(i,j,k) for i in range(1,7) for j in range(1,7)
-                   for k in range(1,7) if len({i,j,k})==3]
+        # 公式ページは「列=1着、列内は2着昇順×3着昇順」。文書順は行ごとに1着が先に変わる
+        _col3 = {first: [(j,k) for j in range(1,7) if j!=first
+                               for k in range(1,7) if k!=first and k!=j]
+                 for first in range(1,7)}
+        combos3 = [(first,)+_col3[first][r]
+                   for r in range(20) for first in range(1,7)]
         for idx,(i,j,k) in enumerate(combos3):
             if idx < len(vals3):
                 try: out["rensho_3t"][(i,j,k)] = float(vals3[idx])

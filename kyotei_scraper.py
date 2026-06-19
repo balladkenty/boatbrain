@@ -388,30 +388,26 @@ def fetch_result(jcd: int, race_no: int, date_str: str = None) -> dict:
         finishes = sorted(finish_m, key=lambda x: zen_to_han.get(x[0],9))
         out["finishes"] = [int(x[1]) for x in finishes]
 
-    # 払戻テーブル
-    # 単勝: 艇番と金額
-    tansho_m = re.findall(
-        r'単勝.*?<td[^>]*>([1-6])</td>\s*<td[^>]*>([\d,]+)円',
-        html, re.DOTALL
-    )
-    for boat, amount in tansho_m:
-        out["tansho_payout"][int(boat)] = int(amount.replace(',',''))
+    # 払戻金（公式: 組番=span.numberSet1_number、金額=span.is-payout1「¥40,850」形式）
+    def _payout(label):
+        m = re.search(r'>' + label + r'</td>(.*?)is-payout1[^>]*>([^<]+)<', html, re.S)
+        if not m:
+            return None, None
+        nums = re.findall(r'numberSet1_number[^>]*>(\d)</span>', m.group(1))
+        amt = re.sub(r'[^\d]', '', m.group(2))
+        if not nums or not amt:
+            return None, None
+        return [int(x) for x in nums], int(amt)
 
-    # 3連単
-    san_m = re.findall(
-        r'<td[^>]*>([1-6])-([1-6])-([1-6])</td>\s*<td[^>]*>([\d,]+)円',
-        html
-    )
-    for a,b,c,amt in san_m:
-        out["rensho_3t_payout"][(int(a),int(b),int(c))] = int(amt.replace(',',''))
-
-    # 2連単
-    ni_m = re.findall(
-        r'<td[^>]*>([1-6])-([1-6])</td>\s*<td[^>]*>([\d,]+)円',
-        html
-    )
-    for a,b,amt in ni_m:
-        out["rensho_2t_payout"][(int(a),int(b))] = int(amt.replace(',',''))
+    n, a = _payout("単勝")
+    if n:
+        out["tansho_payout"][n[0]] = a
+    n, a = _payout("2連単")
+    if n and len(n) >= 2:
+        out["rensho_2t_payout"][(n[0], n[1])] = a
+    n, a = _payout("3連単")
+    if n and len(n) >= 3:
+        out["rensho_3t_payout"][(n[0], n[1], n[2])] = a
 
     return out
 
